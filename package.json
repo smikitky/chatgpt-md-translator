@@ -1,0 +1,30 @@
+{
+  "name": "gpt-markdown-translator",
+  "version": "0.1.0",
+  "description": "Translates Markdown using ChatGPT API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Soichiro Miki <smiki-tky@umin.ac.jp>",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "minimist": "^1.2.8",
+    "node-fetch": "^3.3.1",
+    "simple-git": "^3.17.0",
+    "ts-node": "^10.9.1"
+  },
+  "devDependencies": {
+    "@types/minimist": "^1.2.2",
+    "@types/node": "^18.15.3",
+    "prettier": "^2.8.4"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "none",
+    "arrowParens": "avoid"
+  }
+}
