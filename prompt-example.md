@@ -1,9 +1,9 @@
 <!--
 Copy this file as `prompt.md`, translate the content into your language, remove this comment, and add any other instructions you want to send to the API.
-You will probably want to add a glossary for words that are often translated wrongly or inconsistently.
+You will probably want to add a glossary for words that are often translated incorrectly or inconsistently.
 -->
 
-I am translating the Rect documentation for %%%%%.
+I am translating the React documentation for %%%%%.
 Please translate the Markdown content I'll paste later to %%%%%.
 
 You must strictly follow the rules below.

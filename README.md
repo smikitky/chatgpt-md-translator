@@ -4,12 +4,12 @@ This tool translates a Markdown file into another (natural) language by using Op
 
 As compared to other translation services, ChatGPT is well suited for translating technical documents for several reasons:
 
-- As a large language model, it has a good technical understanding of Markdown and many open-source projects.
-- You can pass any natural language instructions, such as "Use friendly language", "Translate A as B if X and C if Y".
+- As a large language model, it has a good technical understanding of Markdown and many open-source projects. It tries to preserve the Markdown structure if instructed to do so.
+- You can pass any natural language instruction, such as "Use friendly language", "Translate A as B if X and C if Y".
 
 ## Usage
 
-For now, this is an experimental project and has not been published to NPM. But this lets you hack the script instantly!
+For now, this is an experimental project and has not been published to NPM. But this also means you can hack the script instantly!
 
 1. Make sure you have a recent version of Node.js installed.
 2. Clone this repository from GitHub, `cd` into it, and run `npm install` (or `npm ci`).
@@ -20,14 +20,14 @@ For now, this is an experimental project and has not been published to NPM. But 
 
 ## Fragment Size
 
-Since ChatGPT cannot handle long texts, this program works by splitting a given Markdown file into multiple parts (fragments), passing them to the API along with an instruction in parallel, and combining the translated results. It also removes code blocks before passing the contents to the API and restores them after the translation.
+Since ChatGPT cannot handle long texts, this program works by splitting a given Markdown file into multiple parts (fragments), passing them to the API along with the instruction (`prompt.md`) in parallel, and combining the translated results. It also removes code blocks before passing the contents to the API and restores them after the translation.
 
 The `-f` option (or `FRAGMENT_TOKEN_SIZE` env) determines the (soft) maximum length of each fragment. The default is 2048 (in string `.length`). The appropriate value depends on several factors:
 
 - **Model**: GPT-4 can handle a larger amount of text at once.
 - **Target Language**: Some languages are *tokenized* less effectively than others, which can limit the size of each fragment. Read [OpenAI's explanation about tokens](https://platform.openai.com/docs/introduction/tokens) carefully.
-- **Prompt file size**: The prompt is sent as input along with the Markdown source. The longer the instruction is, the shorter each fragment has to be.
-- **Desired processing time**: Splitting into smaller sizes allows for parallel processing and faster completion.
+- **Prompt File Size**: The prompt is sent as input along with the Markdown source. The longer the instruction is, the shorter each fragment has to be.
+- **Desired Processing Time**: Splitting into smaller sizes allows for parallel processing and faster completion.
 
 Setting a value that is too large can result in longer processing time, and in worse cases, the transfer of the translated text may stop midway. If this happens, the program will automatically split the text in half and try again. But you should avoid this as it can waste both your time and money.
 
