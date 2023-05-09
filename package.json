@@ -1,5 +1,5 @@
 {
-  "name": "gpt-markdown-translator",
+  "name": "markdown-gpt-translator",
   "version": "0.1.0",
   "description": "Translates Markdown using ChatGPT API",
   "main": "index.js",
@@ -14,7 +14,8 @@
     "dotenv": "^16.0.3",
     "minimist": "^1.2.8",
     "node-fetch": "^3.3.1",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
   },
   "devDependencies": {
     "@types/minimist": "^1.2.2",
