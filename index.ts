@@ -140,7 +140,10 @@ const callApi = async (
     body: JSON.stringify({
       model,
       messages: [
-        { role: 'system', content: 'You are a translator for React docs.' },
+        {
+          role: 'system',
+          content: 'You are a translator for Markdown documents.'
+        },
         { role: 'user', content: instruction },
         {
           role: 'assistant',
