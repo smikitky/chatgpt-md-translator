@@ -25,11 +25,11 @@ Since ChatGPT cannot handle long texts, this program works by splitting a given 
 The `-f` option (or `FRAGMENT_TOKEN_SIZE` env) determines the (soft) maximum length of each fragment. The default is 2048 (in string `.length`). The appropriate value depends on several factors:
 
 - **Model**: GPT-4 can handle a larger amount of text at once.
-- **Target Language**: Some languages are *tokenized* less effectively than others, which can limit the size of each fragment. Read [OpenAI's explanation about tokens](https://platform.openai.com/docs/introduction/tokens) carefully.
+- **Target Language**: Some languages are _tokenized_ less effectively than others, which can limit the size of each fragment. Read [OpenAI's explanation about tokens](https://platform.openai.com/docs/introduction/tokens) carefully.
 - **Prompt File Size**: The prompt is sent as input along with the Markdown source. The longer the instruction is, the shorter each fragment has to be.
 - **Desired Processing Time**: Splitting into smaller sizes allows for parallel processing and faster completion.
 
-Setting a value that is too large can result in longer processing time, and in worse cases, the transfer of the translated text may stop midway. If this happens, the program will automatically split the text in half and try again. But you should avoid this as it can waste both your time and money.
+Setting a value that is too large can result in longer processing time, and in worse cases, the transfer of the translated text may stop midway. If this happens, the program will automatically split the fragment in half and try again recursively. But you should avoid this as it can waste both your time and money.
 
 On the other hand, splitting the text into too small fragments can result in a loss of term consistency or accuracy in the translation, since there is less context available for each translation process.
 
@@ -46,12 +46,13 @@ Example: `npx ts-node-esm index.ts -m 4 -f 1000 learn/thinking-in-react.md`
 
 As of April 2023, the GPT-4 model is in a limited beta. If you are not granted access yet, you'll get an error saying the model 'gpt-4' does not exist. [Join the waitlist](https://openai.com/waitlist/gpt-4-api).
 
-GPT-4 model is slow and &gt;10 times more expensive than GPT-3. Try using the GPT-3 model first, especially while you are experimenting with this tool. It's recommended to set the usage limit to a reasonable amount (e.g., $10) on the OpenAI's account management page.
+Although GPT-4 is much smarter, it is slower and &gt;10 times more expensive than GPT-3. Try using the GPT-3 model first, especially while you are experimenting with this tool. It's recommended to set the usage limit to a reasonable amount (e.g., $10) on the OpenAI's account management page.
 
 ## Limitations
 
+- This tool does not do serious Markdown parsing for fragment splitting. The algorithm may fail on an atypical file that has huge _indented_ code blocks or has no blank line at all.
+- The tool has not been tested with Markdown files outside of React Docs (react.dev), although I expect most potential problems can be solved by tweaking `instruction.md`.
 - Contents in code blocks (\`\`\`), including comments, are not translated.
 - This tool itself is free, but you will be charged according to [OpenAI's pricing page](https://openai.com/pricing). **Even if you're a ChatGPT Plus subscriber, access to the API is not free.**
-- The combination of this tool and GPT-4 should do 80% of the translation job, but be sure to review the result at your own responsibility. It occasionally ignores your instruction or outputs invalid Markdown, most of which are easily detectable and fixable with tools like VSCode's diff editor. 
+- The combination of this tool and GPT-4 should do 80% of the translation job, but be sure to review the result at your own responsibility. It occasionally ignores your instruction or outputs invalid Markdown, most of which are easily detectable and fixable with tools like VSCode's diff editor.
 - The API is sometimes unstable. If you experience frequent connection errors, reduce the fragment size or try again a few hours later.
-- This tool does not (and will not) perform serious Markdown parsing.

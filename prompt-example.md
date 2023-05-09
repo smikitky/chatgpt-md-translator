@@ -1,5 +1,6 @@
 <!--
 Copy this file as `prompt.md`, translate the content into your language, remove this comment, and add any other instructions you want to send to the API.
+Some of the instructions below are specific to React Docs. Feel free to remove or modify them.
 You will probably want to add a glossary for words that are often translated incorrectly or inconsistently.
 -->
 
