@@ -50,8 +50,10 @@ const splitStringAtBlankLine = (
 ): string[] | null => {
   const lines = input.split('\n');
   let inCodeBlock = false;
-  let currentFragment = [];
+  let currentFragment: string[] = [];
   let fragments: string[] = [];
+  let nearstToHalfDiff: number = Infinity;
+  let nearstToHalfIndex: number = -1;
 
   for (let i = 0; i < lines.length; i++) {
     if (lines[i].startsWith('```')) inCodeBlock = !inCodeBlock;
@@ -59,27 +61,31 @@ const splitStringAtBlankLine = (
     if (!inCodeBlock && lines[i].trim() === '') {
       const currentLength = currentFragment.join('\n').length;
 
-      if (fragmentLength && currentLength + lines[i].length > fragmentLength) {
-        fragments.push(currentFragment.join('\n'));
-        currentFragment = [];
-      } else if (!fragmentLength) {
-        const halfLength = lines.length / 2;
-        const splitIndex = i;
-        if (
-          Math.abs(halfLength - splitIndex) <
-          Math.abs(halfLength - fragments.length)
-        ) {
+      if (fragmentLength > 0) {
+        if (currentLength + lines[i].length > fragmentLength) {
           fragments.push(currentFragment.join('\n'));
           currentFragment = [];
+        }
+      } else {
+        const halfLength = Math.floor(lines.length / 2);
+        if (Math.abs(halfLength - i) < nearstToHalfDiff) {
+          nearstToHalfDiff = Math.abs(halfLength - i);
+          nearstToHalfIndex = i;
         }
       }
     }
     currentFragment.push(lines[i]);
   }
 
-  fragments.push(currentFragment.join('\n'));
-  if (fragments.length === 1 && fragmentLength > 0) return null;
-  return fragments;
+  if (fragmentLength === 0) {
+    if (nearstToHalfIndex === -1) return null; // no split point found
+    fragments.push(lines.slice(0, nearstToHalfIndex).join('\n'));
+    fragments.push(lines.slice(nearstToHalfIndex).join('\n'));
+    return fragments;
+  } else {
+    fragments.push(currentFragment.join('\n'));
+    return fragments;
+  }
 };
 
 type ErrorResponse = {
@@ -224,10 +230,10 @@ const translateOne = async (
 
   if (
     res.status === 'error' &&
-    res.message.match(/reduce the length|stream read error/)
+    res.message.match(/reduce the length|stream read error/i)
   ) {
-    // The input seems too long, so split the text in half and retry
-    const splitResult = splitStringAtBlankLine(text);
+    // Looks like the input was too long, so split the text in half and retry
+    const splitResult = splitStringAtBlankLine(text, 0);
     if (splitResult === null) return text; // perhaps code blocks only
     return await translateMultiple(splitResult, instruction, model, onStatus);
   }
@@ -251,7 +257,7 @@ const replaceCodeBlocks = (mdContent: string): ReplaceResult => {
     if (lines.length >= 5) {
       const id = crypto.randomBytes(3).toString('hex');
       codeBlocks[id] = match;
-      return `${lines[0]}\n(omitted-code-block-${id})\n\`\`\``;
+      return `${lines[0]}\n(omittedCodeBlock-${id})\n\`\`\``;
     } else return match;
   });
   return { output, codeBlocks };
@@ -261,7 +267,7 @@ const restoreCodeBlocks = (
   mdContent: string,
   codeBlocks: CodeBlocks
 ): string => {
-  const placeholderRegex = /```(.*?)\n\(omitted-code-block-([a-z0-9]+)\)\n```/g;
+  const placeholderRegex = /```(.*?)\n\(omittedCodeBlock-([a-z0-9]+)\)\n```/g;
   return mdContent.replace(
     placeholderRegex,
     (_, lang, id) => codeBlocks[id] ?? '(code block not found)'
@@ -285,7 +291,8 @@ const main = async () => {
   const fragmentSize =
     Number(args.f) || Number(process.env.FRAGMENT_TOKEN_SIZE) || 2048;
 
-  if (args._.length !== 1) throw new Error('Specify one markdown file.');
+  if (args._.length !== 1)
+    throw new Error('Specify one (and only one) markdown file.');
   const file = args._[0] as string;
 
   const filePath = path.resolve(baseDir, file);
