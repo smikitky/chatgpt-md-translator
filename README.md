@@ -1,6 +1,6 @@
 # ChatGPT Markdown Translator
 
-This tool translates a Markdown file into another (natural) language by using OpenAI's ChatGPT API. It's main purpose is to translate docs sites for open-source libraries.
+This tool translates a Markdown file into another (natural) language by using OpenAI's ChatGPT API. Its main purpose is to translate docs sites for open-source libraries.
 
 As compared to other translation services, ChatGPT is well suited for translating technical documents for several reasons:
 
