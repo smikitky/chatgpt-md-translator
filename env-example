@@ -17,3 +17,6 @@ OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 # Soft limit of the token size, used to split the file into fragments.
 # FRAGMENT_TOKEN_SIZE=2048
+
+# Sampling temperature, i.e., randomness of the generated text.
+# TEMPERATURE=1

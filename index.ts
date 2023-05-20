@@ -88,6 +88,11 @@ const splitStringAtBlankLine = (
   }
 };
 
+type ApiOptions = {
+  model: string;
+  temperature?: number;
+};
+
 type ErrorResponse = {
   error: {
     message: string;
@@ -127,10 +132,11 @@ const statusToText = (status: Status): string => {
 const callApi = async (
   text: string,
   instruction: string,
-  model: string,
+  apiOptions: ApiOptions,
   onStatus: (status: Status) => void,
   maxRetry = 5
 ): Promise<Status> => {
+  const { model, temperature = 1 } = apiOptions;
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -139,6 +145,7 @@ const callApi = async (
     },
     body: JSON.stringify({
       model,
+      temperature,
       messages: [
         {
           role: 'system',
@@ -162,7 +169,13 @@ const callApi = async (
     if (res.error.message.match(/You can retry/) && maxRetry > 0) {
       // Sometimes the API returns an error saying 'You can retry'. So we retry.
       onStatus({ status: 'pending', lastToken: `(Retrying ${maxRetry})` });
-      return await callApi(text, instruction, model, onStatus, maxRetry - 1);
+      return await callApi(
+        text,
+        instruction,
+        apiOptions,
+        onStatus,
+        maxRetry - 1
+      );
     }
     onStatus({ status: 'error', message: res.error.message });
     return { status: 'error', message: res.error.message };
@@ -195,7 +208,7 @@ const callApi = async (
 const translateMultiple = async (
   fragments: string[],
   instruction: string,
-  model: string,
+  apiOptions: ApiOptions,
   onStatus: (status: Status) => void
 ) => {
   const statuses: Status[] = new Array(fragments.length).fill(0).map(() => ({
@@ -214,7 +227,7 @@ const translateMultiple = async (
   };
   const results = await Promise.all(
     fragments.map((fragment, index) =>
-      translateOne(fragment, instruction, model, handleNewStatus(index))
+      translateOne(fragment, instruction, apiOptions, handleNewStatus(index))
     )
   );
   const finalResult = results.join('\n\n');
@@ -225,11 +238,11 @@ const translateMultiple = async (
 const translateOne = async (
   text: string,
   instruction: string,
-  model: string,
+  apiOptions: ApiOptions,
   onStatus: (status: Status) => void
 ): Promise<string> => {
   onStatus({ status: 'pending', lastToken: '' });
-  const res = await callApi(text, instruction, model, onStatus);
+  const res = await callApi(text, instruction, apiOptions, onStatus);
 
   if (
     res.status === 'error' &&
@@ -238,7 +251,12 @@ const translateOne = async (
     // Looks like the input was too long, so split the text in half and retry
     const splitResult = splitStringAtBlankLine(text, 0);
     if (splitResult === null) return text; // perhaps code blocks only
-    return await translateMultiple(splitResult, instruction, model, onStatus);
+    return await translateMultiple(
+      splitResult,
+      instruction,
+      apiOptions,
+      onStatus
+    );
   }
 
   if (res.status === 'error') throw new Error(res.message);
@@ -286,11 +304,26 @@ const resolveModelShorthand = (model: string): string => {
   return shorthands[model] ?? model;
 };
 
+const readTextFile = async (filePath: string): Promise<string> => {
+  try {
+    return await fs.readFile(filePath, 'utf-8');
+  } catch (e: any) {
+    if (e.code === 'ENOENT') {
+      console.error(`File not found: ${filePath}`);
+      process.exit(1);
+    } else {
+      throw e;
+    }
+  }
+};
+
 const main = async () => {
   await checkConfiguration();
 
   const args = minimist(process.argv.slice(2));
   const model = resolveModelShorthand(args.m ?? process.env.MODEL_NAME ?? '3');
+  const temperature: number | undefined =
+    Number(args.t) || Number(process.env.TEMPERATURE) || undefined;
   const fragmentSize =
     Number(args.f) || Number(process.env.FRAGMENT_TOKEN_SIZE) || 2048;
 
@@ -299,15 +332,17 @@ const main = async () => {
   const file = args._[0] as string;
 
   const filePath = path.resolve(baseDir, file);
-  const markdown = await fs.readFile(filePath, 'utf-8');
-  const instruction = await fs.readFile(promptFile, 'utf-8');
+
+  const markdown = await readTextFile(filePath);
+  const instruction = await readTextFile(promptFile);
 
   const { output: replacedMd, codeBlocks } = replaceCodeBlocks(markdown);
   const fragments = splitStringAtBlankLine(replacedMd, fragmentSize)!;
 
   let status: Status = { status: 'pending', lastToken: '' };
 
-  console.log(`Translating ${file} using ${model}...\n`);
+  console.log(`Translating ${file}...\n`);
+  console.log(`Model: ${model}, Temperature: ${temperature ?? 'default'}\n\n`);
   const printStatus = () => {
     process.stdout.write('\x1b[1A\x1b[2K'); // clear previous line
     console.log(statusToText(status));
@@ -317,7 +352,7 @@ const main = async () => {
   const translatedText = await translateMultiple(
     fragments,
     instruction,
-    model,
+    { model, temperature },
     newStatus => {
       status = newStatus;
       printStatus();

@@ -6,7 +6,7 @@ As an example, this is React Tutorial translated into Japanese with this tool: [
 
 As compared to other translation services, ChatGPT is well suited for translating technical documents for several reasons:
 
-- As a large language model, it has a good technical understanding of Markdown and many open-source projects. It tries to preserve the Markdown structure if instructed to do so.
+- As a large language model, it has a good technical understanding of Markdown and many open-source projects. It tries to preserve the Markdown structure when instructed to do so.
 - You can pass any natural language instruction, such as "Use friendly language", "Translate A as B if X and C if Y".
 
 This tool itself is free, but you will be charged according to [OpenAI's pricing page](https://openai.com/pricing). **Even if you're a ChatGPT Plus subscriber, access to the API is not free.**
@@ -22,7 +22,19 @@ For now, this is an experimental project and has not been published to NPM. But 
 5. Copy `prompt-example.md` as `prompt.md`, and edit its contents. At least, you need to specify the language name. The contents of this file are included in each API call, so you can write instructions to ChatGPT in a natural language.
 6. Run `npx ts-node-esm index.ts [file-to-translate.md]`. The Markdown file will be overwritten, so make sure it is in a VCS.
 
-## Fragment Size
+## Configuration
+
+In addition to `OPENAI_API_TOKEN`, you can set several values in `.env`.
+
+### Model (`MODEL_NAME`)
+
+Set it to one of `gpt-4`, `gpt-4-32k` or `gpt-3.5-turbo`. This is the setting that has the greatest impact on translation accuracy (and price!).
+
+As of May 2023, the GPT-4 model is in a limited beta. If you are not granted access yet, you'll get an error saying the model 'gpt-4' does not exist. [Join the waitlist](https://openai.com/waitlist/gpt-4-api).
+
+Although GPT-4 is much smarter, it is slower and &gt;10 times more expensive than GPT-3. Try using the GPT-3 model first, especially while you are experimenting with this tool. It's recommended to set the usage limit to a reasonable amount (e.g., $10) on the OpenAI's account management page.
+
+### Fragment Size (`FRAGMENT_TOKEN_SIZE`)
 
 Since ChatGPT cannot handle long texts, this program works by splitting a given Markdown file into multiple parts (fragments), passing them to the API along with the instruction (`prompt.md`) in parallel, and combining the translated results. It also removes code blocks before passing the contents to the API and restores them after the translation (this means nothing inside clode blocks will be translated).
 
@@ -37,20 +49,19 @@ Setting a value that is too large can result in longer processing time, and in w
 
 On the other hand, splitting the text into too small fragments can result in a loss of term consistency or accuracy in the translation, since there is less context available for each translation process.
 
+### Temperature (`TEMPERATURE`)
+
+This determines the randomness of the output. See the [official API docs](https://platform.openai.com/docs/api-reference/completions/create#completions/create-temperature). The default is `1`, but you may want to keep this value low (such as `0.1`), because this tool works by splitting a file, and randomness is not really necessary for good translation.
+
 ## CLI Options
 
 These can be used to override the settings in `.env`.
 
 Example: `npx ts-node-esm index.ts -m 4 -f 1000 learn/thinking-in-react.md`
 
-- `-f <number>`: Sets the fragment size (in string length). See above.
-- `-m <model>`: Sets the language model (one of 'gpt-4', 'gpt-4-32k' or 'gpt-3.5-turbo'). Shorthands are available ('4', '4large' and '3', respectively). See below.
-
-## Models
-
-As of April 2023, the GPT-4 model is in a limited beta. If you are not granted access yet, you'll get an error saying the model 'gpt-4' does not exist. [Join the waitlist](https://openai.com/waitlist/gpt-4-api).
-
-Although GPT-4 is much smarter, it is slower and &gt;10 times more expensive than GPT-3. Try using the GPT-3 model first, especially while you are experimenting with this tool. It's recommended to set the usage limit to a reasonable amount (e.g., $10) on the OpenAI's account management page.
+- `-m <model>`: Sets the language model (one of 'gpt-4', 'gpt-4-32k' or 'gpt-3.5-turbo'). Shorthands are available ('4', '4large' and '3', respectively).
+- `-f <number>`: Sets the fragment size (in string length).
+- `-t <temperature>`: Sets the "temperature", or the randomness of the output.
 
 ## Limitations
 
