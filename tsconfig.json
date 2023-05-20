@@ -4,6 +4,8 @@
     "target": "es2015",
     "module": "es2022",
     "moduleResolution": "node",
+    "outDir": "./dist",
+    "sourceMap": true,
     "allowSyntheticDefaultImports": true
   },
   "ts-node": {

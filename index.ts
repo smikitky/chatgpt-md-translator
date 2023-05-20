@@ -1,16 +1,19 @@
+#!/usr/bin/env node
+
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import * as rl from 'node:readline';
-
+import * as url from 'url';
 import * as dotenv from 'dotenv';
 import minimist from 'minimist';
-import fetch from 'node-fetch';
+import axios, { Axios, AxiosError } from 'axios';
+import { IncomingMessage } from 'node:http';
 
 // Run this like:
 // npx ts-node-esm index.ts <file_name>
 
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 dotenv.config();
 const apiKey = process.env.OPENAI_API_KEY;
@@ -131,45 +134,61 @@ const callApi = async (
   onStatus: (status: Status) => void,
   maxRetry = 5
 ): Promise<Status> => {
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
+
+  const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+    model,
+    messages: [
+      {
+        role: 'system',
+        content: 'You are a translator for Markdown documents.'
+      },
+      { role: 'user', content: instruction },
+      {
+        role: 'assistant',
+        content:
+          'Okay, input the Markdown.\n' +
+          'I will only return the translated text.'
+      },
+      { role: 'user', content: text }
+    ],
+    stream: true
+  }, {
+    responseType: 'stream',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey}`
-    },
-    body: JSON.stringify({
-      model,
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a translator for Markdown documents.'
-        },
-        { role: 'user', content: instruction },
-        {
-          role: 'assistant',
-          content:
-            'Okay, input the Markdown.\n' +
-            'I will only return the translated text.'
-        },
-        { role: 'user', content: text }
-      ],
-      stream: true
-    })
+    }
+  }).catch((e: AxiosError) => {
+    if (e.response) return e.response;
+    throw new Error(e.message);
   });
 
   if (response.status >= 400) {
-    const res = (await response.json()) as ErrorResponse;
-    if (res.error.message.match(/You can retry/) && maxRetry > 0) {
-      // Sometimes the API returns an error saying 'You can retry'. So we retry.
-      onStatus({ status: 'pending', lastToken: `(Retrying ${maxRetry})` });
-      return await callApi(text, instruction, model, onStatus, maxRetry - 1);
+    const res = response.data as IncomingMessage;
+    // get json response from res stream
+    const body = await new Promise<string>((resolve, reject) => {
+      let data = '';
+      res.on('data', chunk => (data += chunk));
+      res.on('end', () => resolve(data));
+      res.on('error', reject);
+    });
+    // check if res is json
+    if (res.headers['content-type']?.startsWith('application/json')) {
+      const json: ErrorResponse = JSON.parse(body);
+      if (json.error.message.match(/You can retry/) && maxRetry > 0) {
+        // Sometimes the API returns an error saying 'You can retry'. So we retry.
+        onStatus({ status: 'pending', lastToken: `(Retrying ${maxRetry})` });
+        return await callApi(text, instruction, model, onStatus, maxRetry - 1);
+      }
+      onStatus({ status: 'error', message: json.error.message });
+      return { status: 'error', message: json.error.message };
+    } else {
+      onStatus({ status: 'error', message: body });
+      return { status: 'error', message: body };
     }
-    onStatus({ status: 'error', message: res.error.message });
-    return { status: 'error', message: res.error.message };
   } else {
-    const stream = response.body!;
     let resultText = '';
-    const reader = rl.createInterface(stream);
+    const reader = rl.createInterface(response.data);
     try {
       for await (const line of reader) {
         if (line.trim().length === 0) continue;
@@ -212,11 +231,29 @@ const translateMultiple = async (
       });
     };
   };
-  const results = await Promise.all(
-    fragments.map((fragment, index) =>
-      translateOne(fragment, instruction, model, handleNewStatus(index))
-    )
-  );
+  let results = [];
+  // if process.argv contains --fast call translateOne in parallel
+  if (process.argv.includes('--fast')) {
+    // translateOne is called in parallel
+    results = await Promise.all(
+      fragments.map((fragment, index) =>
+        translateOne(fragment, instruction, model, handleNewStatus(index))
+      )
+    );
+  } else {
+    // translateOne is called in sequence
+    for (let i = 0; i < fragments.length; i++) {
+      const fragment = fragments[i];
+      const startTime = Date.now();
+      const result = await translateOne(fragment, instruction, model, handleNewStatus(i));
+      results.push(result);
+      const timeCost = Date.now() - startTime;
+      // wait at most 20 seconds from startTime, free openai account has rate limit of 3 requests per minute
+      if (timeCost < 20000) {
+        await new Promise(resolve => setTimeout(resolve, 20000 - timeCost));
+      }
+    }
+  }
   const finalResult = results.join('\n\n');
   onStatus({ status: 'done', translation: finalResult });
   return finalResult;
@@ -286,48 +323,77 @@ const resolveModelShorthand = (model: string): string => {
   return shorthands[model] ?? model;
 };
 
+// function list all markdown file in baseDir and its subdirectories
+const listMarkdownFiles = async (baseDir: string): Promise<string[]> => {
+  const files: string[] = [];
+  const filesInCwd = await fs.readdir(baseDir);
+  for (const file of filesInCwd) {
+    const filePath = path.join(baseDir, file);
+    const stat = await fs.stat(filePath);
+    if (stat.isDirectory()) {
+      const subFiles = await listMarkdownFiles(filePath);
+      files.push(...subFiles);
+    } else if (file.endsWith('.md')) {
+      files.push(filePath);
+    }
+  }
+  return files;
+};
+
+// test listMarkdownFiles
+// listMarkdownFiles(process.cwd()).then(files => console.log(files));
+
 const main = async () => {
   await checkConfiguration();
 
-  const args = minimist(process.argv.slice(2));
+  const args = minimist(process.argv.slice(2), { boolean: 'fast' });
   const model = resolveModelShorthand(args.m ?? process.env.MODEL_NAME ?? '3');
   const fragmentSize =
     Number(args.f) || Number(process.env.FRAGMENT_TOKEN_SIZE) || 2048;
 
   if (args._.length !== 1)
-    throw new Error('Specify one (and only one) markdown file.');
-  const file = args._[0] as string;
+    throw new Error('Specify one (and only one) markdown file, or dot (.) for all markdown in BASE_DIR.');
 
-  const filePath = path.resolve(baseDir, file);
-  const markdown = await fs.readFile(filePath, 'utf-8');
-  const instruction = await fs.readFile(promptFile, 'utf-8');
+  const files: string[] = [];
+  if (args._[0] === '.') {
+    const filesInCwd = await listMarkdownFiles(baseDir);
+    files.push(...filesInCwd);
+  } else {
+    files.push(path.resolve(baseDir, args._[0]));
+  }
 
-  const { output: replacedMd, codeBlocks } = replaceCodeBlocks(markdown);
-  const fragments = splitStringAtBlankLine(replacedMd, fragmentSize)!;
+  for(const filePath of files) {
+    const file = filePath.replace(baseDir, '');
+    const markdown = await fs.readFile(filePath, 'utf-8');
+    const instruction = await fs.readFile(promptFile, 'utf-8');
 
-  let status: Status = { status: 'pending', lastToken: '' };
+    const { output: replacedMd, codeBlocks } = replaceCodeBlocks(markdown);
+    const fragments = splitStringAtBlankLine(replacedMd, fragmentSize)!;
 
-  console.log(`Translating ${file} using ${model}...\n`);
-  const printStatus = () => {
-    process.stdout.write('\x1b[1A\x1b[2K'); // clear previous line
-    console.log(statusToText(status));
-  };
-  printStatus();
+    let status: Status = { status: 'pending', lastToken: '' };
 
-  const translatedText = await translateMultiple(
-    fragments,
-    instruction,
-    model,
-    newStatus => {
-      status = newStatus;
-      printStatus();
-    }
-  );
+    console.log(`Translating ${file} using ${model}...\n`);
+    const printStatus = () => {
+      process.stdout.write('\x1b[1A\x1b[2K'); // clear previous line
+      console.log(statusToText(status));
+    };
+    printStatus();
 
-  const finalResult = restoreCodeBlocks(translatedText, codeBlocks) + '\n';
+    const translatedText = await translateMultiple(
+      fragments,
+      instruction,
+      model,
+      newStatus => {
+        status = newStatus;
+        printStatus();
+      }
+    );
 
-  await fs.writeFile(filePath, finalResult, 'utf-8');
-  console.log(`\nTranslation done! Saved to ${filePath}.`);
+    const finalResult = restoreCodeBlocks(translatedText, codeBlocks) + '\n';
+
+    await fs.writeFile(filePath, finalResult, 'utf-8');
+    console.log(`\nTranslation done! Saved to ${file}.`);
+  }
 };
 
 main().catch(console.error);

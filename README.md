@@ -21,6 +21,7 @@ For now, this is an experimental project and has not been published to NPM. But 
 4. Copy `env-example` as `.env` and configure. You need to add at least your API key.
 5. Copy `prompt-example.md` as `prompt.md`, and edit its contents. At least, you need to specify the language name. The contents of this file are included in each API call, so you can write instructions to ChatGPT in a natural language.
 6. Run `npx ts-node-esm index.ts [file-to-translate.md]`. The Markdown file will be overwritten, so make sure it is in a VCS.
+7. (Optional) Run `npm build && npm link`, then you can run `markdown-gpt-translator [file-to-translate.md]` from anywhere.
 
 ## Fragment Size
 
@@ -43,8 +44,12 @@ These can be used to override the settings in `.env`.
 
 Example: `npx ts-node-esm index.ts -m 4 -f 1000 learn/thinking-in-react.md`
 
+or Example: `markdown-gpt-translator -m 4 -f 1000 learn/thinking-in-react.md` if you have installed this tool globally.
+
 - `-f <number>`: Sets the fragment size (in string length). See above.
 - `-m <model>`: Sets the language model (one of 'gpt-4', 'gpt-4-32k' or 'gpt-3.5-turbo'). Shorthands are available ('4', '4large' and '3', respectively). See below.
+- `--fast`: Translate in sequence by default it's usefull when account has rate limit. Use this option turn on parallel translation.
+- `.`: If a single dot is passed as the first argument, the program will read the Markdown source from current directory and its subdirectories recursively. This is useful when you want to translate a whole docs site. Example usage: `markdown-gpt-translator . -f 1000`.
 
 ## Models
 
