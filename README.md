@@ -51,7 +51,7 @@ On the other hand, splitting the text into too small fragments can result in a l
 
 ### Temperature (`TEMPERATURE`)
 
-This determines the randomness of the output. See the [official API docs](https://platform.openai.com/docs/api-reference/completions/create#completions/create-temperature). The default is `1`, but you may want to keep this value low (such as `0.1`), because this tool works by splitting a file, and randomness is not really necessary for good translation.
+This controls the randomness of the output. See the [official API docs](https://platform.openai.com/docs/api-reference/completions/create#completions/create-temperature). The default is `0.1`, which is intentionally much lower than the original ChatGPT API default (`1.0`). Since this tool works by splitting a file, too much randomness can lead to inconsistent translations. Experience suggests that a high value also increases the risk of breaking the markups or ignoring the instructions.
 
 ## CLI Options
 

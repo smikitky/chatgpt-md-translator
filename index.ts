@@ -90,7 +90,7 @@ const splitStringAtBlankLine = (
 
 type ApiOptions = {
   model: string;
-  temperature?: number;
+  temperature: number;
 };
 
 type ErrorResponse = {
@@ -136,7 +136,7 @@ const callApi = async (
   onStatus: (status: Status) => void,
   maxRetry = 5
 ): Promise<Status> => {
-  const { model, temperature = 1 } = apiOptions;
+  const { model, temperature } = apiOptions;
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -322,8 +322,7 @@ const main = async () => {
 
   const args = minimist(process.argv.slice(2));
   const model = resolveModelShorthand(args.m ?? process.env.MODEL_NAME ?? '3');
-  const temperature: number | undefined =
-    Number(args.t) || Number(process.env.TEMPERATURE) || undefined;
+  const temperature = Number(args.t) || Number(process.env.TEMPERATURE) || 0.1;
   const fragmentSize =
     Number(args.f) || Number(process.env.FRAGMENT_TOKEN_SIZE) || 2048;
 
@@ -342,7 +341,7 @@ const main = async () => {
   let status: Status = { status: 'pending', lastToken: '' };
 
   console.log(`Translating ${file}...\n`);
-  console.log(`Model: ${model}, Temperature: ${temperature ?? 'default'}\n\n`);
+  console.log(`Model: ${model}, Temperature: ${temperature}\n\n`);
   const printStatus = () => {
     process.stdout.write('\x1b[1A\x1b[2K'); // clear previous line
     console.log(statusToText(status));
