@@ -49,8 +49,7 @@ const translateMultiple = async (
   onStatus: (status: Status) => void
 ) => {
   const statuses: Status[] = new Array(fragments.length).fill(0).map(() => ({
-    status: 'pending',
-    lastToken: ''
+    status: 'waiting'
   }));
   onStatus({ status: 'pending', lastToken: '' });
   const handleNewStatus = (index: number) => {
@@ -85,7 +84,7 @@ const translateOne = async (
   apiOptions: ApiOptions,
   onStatus: (status: Status) => void
 ): Promise<string> => {
-  onStatus({ status: 'pending', lastToken: '' });
+  onStatus({ status: 'waiting' });
   const res = await callApi(text, instruction, apiOptions, onStatus);
 
   if (
@@ -138,6 +137,8 @@ const main = async () => {
   const temperature = Number(args.t) || Number(process.env.TEMPERATURE) || 0.1;
   const fragmentSize =
     Number(args.f) || Number(process.env.FRAGMENT_TOKEN_SIZE) || 2048;
+  const apiCallInterval =
+    Number(args.i) || Number(process.env.API_CALL_INTERVAL) || 0;
 
   if (args._.length !== 1)
     throw new Error('Specify one (and only one) markdown file.');
@@ -161,7 +162,7 @@ const main = async () => {
   };
   printStatus();
 
-  const callApi = configureApiCaller(apiKey!);
+  const callApi = configureApiCaller(apiKey!, apiCallInterval);
 
   const translatedText = await translateMultiple(
     callApi,

@@ -24,7 +24,7 @@ For now, this is an experimental project and has not been published to NPM. But 
 
 ## Configuration
 
-In addition to `OPENAI_API_TOKEN`, you can set several values in `.env`.
+In addition to `OPENAI_API_TOKEN`, you can set several values in `.env`. Only important ones are described below. See the `.env-example` for the full list.
 
 ### Model (`MODEL_NAME`)
 
@@ -60,8 +60,9 @@ These can be used to override the settings in `.env`.
 Example: `npx ts-node-esm index.ts -m 4 -f 1000 learn/thinking-in-react.md`
 
 - `-m <model>`: Sets the language model (one of 'gpt-4', 'gpt-4-32k' or 'gpt-3.5-turbo'). Shorthands are available ('4', '4large' and '3', respectively).
-- `-f <number>`: Sets the fragment size (in string length).
+- `-f <length>`: Sets the fragment size (in string length).
 - `-t <temperature>`: Sets the "temperature", or the randomness of the output.
+- `-i <seconds>`: Sets the API call interval. We will not call the API more frequently than this value (in seconds). The default is 0, which means the API tries to translate all fragments simultaneously. This is especially useful when you're translating a huge file, or when you're still a free trial user.
 
 ## Limitations
 

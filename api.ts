@@ -34,7 +34,43 @@ export type ApiCaller = (
   maxRetry?: number
 ) => Promise<Status>;
 
-const configureApiCaller = (apiKey: string) => {
+/**
+ * Takes an async function and returns a new function
+ * that can only be started once per interval
+ */
+const limitCallRate = <T extends (...args: any[]) => Promise<any>>(
+  func: T,
+  interval: number
+): T => {
+  const queue: {
+    args: Parameters<T>;
+    resolve: (result: Awaited<ReturnType<T>>) => void;
+    reject: (reason: any) => void;
+  }[] = [];
+  let processing = false;
+
+  if (interval <= 0) return func;
+
+  const processQueue = () => {
+    if (queue.length === 0) {
+      processing = false;
+      return;
+    }
+    processing = true;
+    const item = queue.shift()!;
+    func(...item.args).then(item.resolve, item.reject);
+    setTimeout(processQueue, interval * 1000);
+  };
+
+  return ((...args: Parameters<T>) => {
+    return new Promise<Awaited<ReturnType<T>>>((resolve, reject) => {
+      queue.push({ args, resolve, reject });
+      if (!processing) processQueue();
+    });
+  }) as T;
+};
+
+const configureApiCaller = (apiKey: string, rateLimit = 0) => {
   const callApi: ApiCaller = async (
     text,
     instruction,
@@ -43,6 +79,8 @@ const configureApiCaller = (apiKey: string) => {
     maxRetry = 5
   ): Promise<Status> => {
     const { model, temperature } = apiOptions;
+
+    onStatus({ status: 'pending', lastToken: '' });
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -111,7 +149,7 @@ const configureApiCaller = (apiKey: string) => {
       return { status: 'done', translation: resultText };
     }
   };
-  return callApi;
+  return limitCallRate(callApi, rateLimit);
 };
 
 export default configureApiCaller;
