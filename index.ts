@@ -3,7 +3,7 @@ import * as path from 'node:path';
 
 import * as dotenv from 'dotenv';
 import minimist from 'minimist';
-import callApi, { ApiOptions } from './api.js';
+import configureApiCaller, { ApiCaller, ApiOptions } from './api.js';
 import {
   replaceCodeBlocks,
   restoreCodeBlocks,
@@ -42,6 +42,7 @@ const checkConfiguration = async () => {
 };
 
 const translateMultiple = async (
+  callApi: ApiCaller,
   fragments: string[],
   instruction: string,
   apiOptions: ApiOptions,
@@ -63,7 +64,13 @@ const translateMultiple = async (
   };
   const results = await Promise.all(
     fragments.map((fragment, index) =>
-      translateOne(fragment, instruction, apiOptions, handleNewStatus(index))
+      translateOne(
+        callApi,
+        fragment,
+        instruction,
+        apiOptions,
+        handleNewStatus(index)
+      )
     )
   );
   const finalResult = results.join('\n\n');
@@ -72,6 +79,7 @@ const translateMultiple = async (
 };
 
 const translateOne = async (
+  callApi: ApiCaller,
   text: string,
   instruction: string,
   apiOptions: ApiOptions,
@@ -88,6 +96,7 @@ const translateOne = async (
     const splitResult = splitStringAtBlankLines(text, 0);
     if (splitResult === null) return text; // perhaps code blocks only
     return await translateMultiple(
+      callApi,
       splitResult,
       instruction,
       apiOptions,
@@ -152,7 +161,10 @@ const main = async () => {
   };
   printStatus();
 
+  const callApi = configureApiCaller(apiKey!);
+
   const translatedText = await translateMultiple(
+    callApi,
     fragments,
     instruction,
     { model, temperature },
