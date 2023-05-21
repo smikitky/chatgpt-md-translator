@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import * as rl from 'node:readline';
 import { Status } from './status.js';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 
 export type ApiOptions = {
   model: string;
@@ -70,7 +71,15 @@ const limitCallRate = <T extends (...args: any[]) => Promise<any>>(
   }) as T;
 };
 
-const configureApiCaller = (apiKey: string, rateLimit = 0) => {
+export type ConfigureApiOptions = {
+  apiKey: string;
+  rateLimit?: number;
+  httpsProxy?: string;
+};
+
+const configureApiCaller = (options: ConfigureApiOptions) => {
+  const { apiKey, rateLimit = 0, httpsProxy } = options;
+
   const callApi: ApiCaller = async (
     text,
     instruction,
@@ -79,9 +88,11 @@ const configureApiCaller = (apiKey: string, rateLimit = 0) => {
     maxRetry = 5
   ): Promise<Status> => {
     const { model, temperature } = apiOptions;
+    const agent = httpsProxy ? new HttpsProxyAgent(httpsProxy) : undefined;
 
     onStatus({ status: 'pending', lastToken: '' });
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      agent,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -12,6 +12,9 @@ OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxx"
 # Prompt file to use for the translation.
 # PROMPT_FILE="prompt.md"
 
+# HTTPS Proxy (e.g, "https://proxy.example.com:8080")
+# HTTPS_PROXY=""
+
 # Default language model. One of 'gpt-3.5-turbo', 'gpt-4' and 'gpt-4-32k'.
 # MODEL_NAME="gpt-3.5-turbo"
 

@@ -139,6 +139,7 @@ const main = async () => {
     Number(args.f) || Number(process.env.FRAGMENT_TOKEN_SIZE) || 2048;
   const apiCallInterval =
     Number(args.i) || Number(process.env.API_CALL_INTERVAL) || 0;
+  const httpsProxy = process.env.HTTPS_PROXY;
 
   if (args._.length !== 1)
     throw new Error('Specify one (and only one) markdown file.');
@@ -162,7 +163,11 @@ const main = async () => {
   };
   printStatus();
 
-  const callApi = configureApiCaller(apiKey!, apiCallInterval);
+  const callApi = configureApiCaller({
+    apiKey: apiKey!,
+    rateLimit: apiCallInterval,
+    httpsProxy
+  });
 
   const translatedText = await translateMultiple(
     callApi,

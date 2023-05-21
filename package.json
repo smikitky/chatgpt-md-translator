@@ -12,6 +12,7 @@
   "type": "module",
   "dependencies": {
     "dotenv": "^16.0.3",
+    "https-proxy-agent": "^6.2.0",
     "minimist": "^1.2.8",
     "node-fetch": "^3.3.1",
     "ts-node": "^10.9.1",
