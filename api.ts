@@ -89,6 +89,7 @@ const configureApiCaller = (options: ConfigureApiOptions) => {
   ): Promise<Status> => {
     const { model, temperature } = apiOptions;
     const agent = httpsProxy ? new HttpsProxyAgent(httpsProxy) : undefined;
+    const ac = new AbortController();
 
     onStatus({ status: 'pending', lastToken: '' });
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -98,6 +99,7 @@ const configureApiCaller = (options: ConfigureApiOptions) => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`
       },
+      signal: ac.signal,
       body: JSON.stringify({
         model,
         temperature,
@@ -119,27 +121,37 @@ const configureApiCaller = (options: ConfigureApiOptions) => {
       })
     });
 
+    const retry = () => {
+      onStatus({ status: 'pending', lastToken: `(Retrying ${maxRetry})` });
+      return callApi(text, instruction, apiOptions, onStatus, maxRetry - 1);
+    };
+
+    let intervalId: NodeJS.Timeout | undefined;
+
     if (response.status >= 400) {
       const res = (await response.json()) as ErrorResponse;
       if (res.error.message.match(/You can retry/) && maxRetry > 0) {
         // Sometimes the API returns an error saying 'You can retry'. So we retry.
-        onStatus({ status: 'pending', lastToken: `(Retrying ${maxRetry})` });
-        return await callApi(
-          text,
-          instruction,
-          apiOptions,
-          onStatus,
-          maxRetry - 1
-        );
+        return retry();
       }
       onStatus({ status: 'error', message: res.error.message });
       return { status: 'error', message: res.error.message };
     } else {
       const stream = response.body!;
       let resultText = '';
+      let lastReceiveTime = new Date().getTime();
       const reader = rl.createInterface(stream);
+
+      intervalId = setInterval(() => {
+        // If the data transmission is stopped for 30 seconds, we retry.
+        if (lastReceiveTime + 30000 < new Date().getTime()) {
+          ac.abort('Server stopped responding');
+        }
+      }, 1000);
+
       try {
         for await (const line of reader) {
+          lastReceiveTime = new Date().getTime();
           if (line.trim().length === 0) continue;
           if (line.includes('[DONE]')) break;
           const res = JSON.parse(line.split(': ', 2)[1]) as ApiStreamResponse;
@@ -153,8 +165,11 @@ const configureApiCaller = (options: ConfigureApiOptions) => {
           resultText += content;
         }
       } catch (err: any) {
+        if (err?.name === 'AbortError' && maxRetry > 0) return retry();
         onStatus({ status: 'error', message: 'stream read error' });
         return { status: 'error', message: 'stream read error' };
+      } finally {
+        intervalId && clearInterval(intervalId);
       }
       onStatus({ status: 'done', translation: resultText });
       return { status: 'done', translation: resultText };

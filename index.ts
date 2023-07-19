@@ -93,6 +93,11 @@ const translateOne = async (
   ) {
     // Looks like the input was too long, so split the text in half and retry
     const splitResult = splitStringAtBlankLines(text, 0);
+    console.log(
+      'Split: ',
+      splitResult?.map(s => s.length + ':' + s.slice(0, 20)).join(', ')
+    );
+    console.log('\n\n');
     if (splitResult === null) return text; // perhaps code blocks only
     return await translateMultiple(
       callApi,

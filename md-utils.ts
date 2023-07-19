@@ -1,6 +1,6 @@
 import * as crypto from 'node:crypto';
 
-type CodeBlocks = { [id: string]: string };
+type CodeBlocks = Record<string, string>;
 
 interface ReplaceResult {
   output: string;
@@ -20,7 +20,7 @@ export const replaceCodeBlocks = (mdContent: string): ReplaceResult => {
     if (lines.length >= 5) {
       const id = crypto.randomBytes(3).toString('hex');
       codeBlocks[id] = match;
-      return `${lines[0]}\n(omittedCodeBlock-${id})\n\`\`\``;
+      return `${lines[0]}\n(((((${id})))))\n\`\`\``;
     } else return match;
   });
   return { output, codeBlocks };
@@ -36,7 +36,7 @@ export const restoreCodeBlocks = (
   mdContent: string,
   codeBlocks: CodeBlocks
 ): string => {
-  const placeholderRegex = /```(.*?)\n\(omittedCodeBlock-([a-z0-9]+)\)\n```/g;
+  const placeholderRegex = /```(.*?)\n\(\(\(\(\(([a-z0-9]+)\)\)\)\)\)\n```/g;
   return mdContent.replace(
     placeholderRegex,
     (_, lang, id) => codeBlocks[id] ?? '(code block not found)'
@@ -84,7 +84,7 @@ export const splitStringAtBlankLines = (
   }
 
   if (fragmentLength === 0) {
-    if (nearstToHalfIndex === -1) return null; // no split point found
+    if (nearstToHalfIndex <= 0) return null; // no split point found
     fragments.push(lines.slice(0, nearstToHalfIndex).join('\n'));
     fragments.push(lines.slice(nearstToHalfIndex).join('\n'));
     return fragments;
