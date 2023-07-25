@@ -1,7 +1,10 @@
 import { parse } from 'dotenv';
 import * as fs from 'node:fs/promises';
+import * as os from 'node:os';
 import * as path from 'node:path';
 import readTextFile from './readTextFile.js';
+
+const homeDir = os.homedir();
 
 export interface Config {
   apiKey: string;
@@ -27,31 +30,21 @@ const searchFile = async (paths: string[]): Promise<string | null> => {
 };
 
 export const searchConfigFile = async (): Promise<string | null> => {
-  const home = process.env.HOME;
   const envPaths = [
     path.join(process.cwd(), '.markdown-gpt-translator'),
     path.join(process.cwd(), '.env'),
-    ...(home
-      ? [
-          path.join(home, '.config', 'markdown-gpt-translator', 'config'),
-          path.join(home, '.markdown-gpt-translator')
-        ]
-      : [])
+    path.join(homeDir, '.config', 'markdown-gpt-translator', 'config'),
+    path.join(homeDir, '.markdown-gpt-translator')
   ];
   return await searchFile(envPaths);
 };
 
 export const searchPromptFile = async (): Promise<string | null> => {
-  const home = process.env.HOME;
   const promptPaths = [
     path.join(process.cwd(), 'prompt.md'),
     path.join(process.cwd(), '.prompt.md'),
-    ...(home
-      ? [
-          path.join(home, '.config', 'markdown-gpt-translator', 'prompt.md'),
-          path.join(home, '.markdown-gpt-translator-prompt.md')
-        ]
-      : [])
+    path.join(homeDir, '.config', 'markdown-gpt-translator', 'prompt.md'),
+    path.join(homeDir, '.markdown-gpt-translator-prompt.md')
   ];
   return await searchFile(promptPaths);
 };
