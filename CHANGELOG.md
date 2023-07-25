@@ -1,6 +1,6 @@
 ## 1.0.0 (in alpha)
 
-This will be the first version released on NPM.
+This will be the first version released on NPM. It's now published as a standaline CLI tool that can be installed with `npm install -g`.
 
 **BREAKING**
 
