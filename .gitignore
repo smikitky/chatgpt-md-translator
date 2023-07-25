@@ -3,3 +3,4 @@ lib
 .env
 prompt*.md
 !prompt-example.md
+*.tgz
