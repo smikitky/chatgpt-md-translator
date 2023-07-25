@@ -69,12 +69,15 @@ export const loadConfig = async (args: any): Promise<Config> => {
   return {
     apiKey: conf.OPENAI_API_KEY,
     prompt: await readTextFile(promptPath),
-    model: resolveModelShorthand(args.m ?? conf.MODEL_NAME ?? 3),
+    model: resolveModelShorthand(args.model ?? conf.MODEL_NAME ?? 3),
     baseDir: conf.BASE_DIR ?? process.cwd(),
-    apiCallInterval: Number(args.i) || Number(conf.API_CALL_INTERVAL) || 0,
+    apiCallInterval:
+      Number(args.interval) || Number(conf.API_CALL_INTERVAL) || 0,
     fragmentSize:
-      Number(args.f) || Number(process.env.FRAGMENT_TOKEN_SIZE) || 2048,
+      Number(args.fragment_size) ||
+      Number(process.env.FRAGMENT_TOKEN_SIZE) ||
+      2048,
     httpsProxy: conf.HTTPS_PROXY,
-    temperature: Number(args.t) || Number(conf.TEMPERATURE) || 0.1
+    temperature: Number(args.temperature) || Number(conf.TEMPERATURE) || 0.1
   };
 };

@@ -2,7 +2,7 @@
 
 This tool translates a Markdown file into another (natural) language by using OpenAI's ChatGPT API. Its main purpose is to help people translate docs sites for open-source libraries.
 
-As an example, this is React Tutorial translated into Japanese with this tool: [チュートリアル：三目並べ](https://ja-react-8aa88t4yk-fbopensource.vercel.app/learn/tutorial-tic-tac-toe) (Note that the output contained a small number of syntax and line break errors that required several minutes of fixing using VS Code's diff editor.)
+As an example, this is React Tutorial translated into Japanese with this tool: [チュートリアル：三目並べ](https://ja-react-8aa88t4yk-fbopensource.vercel.app/learn/tutorial-tic-tac-toe)
 
 As compared to other translation services, ChatGPT is well suited for translating technical documents for several reasons:
 
@@ -16,19 +16,19 @@ This tool itself is free, but you will be charged according to [OpenAI's pricing
 1. Make sure you have a recent version of Node.js installed.
 2. Run `npm install --global markdown-gpt-translator`.
 3. Go to [OpenAI's developer section](https://platform.openai.com/overview), sign up, register _your own_ credit card, and generate an API key.
-4. Create the config file. To do so, use [this template](https://github.com/smikitky/markdown-gpt-translator/blob/main/env-example) and save it to one of the following locations (CWD refers to the directory where this tool is invoked). You need to add at least your API key.
+4. Create a config file. To do so, use [this template](https://github.com/smikitky/markdown-gpt-translator/blob/main/env-example) and save it to one of the following locations ($CWD refers to the directory where this tool will be invoked). You need to specify at least your API key.
 
-   - `${CWD}/.markdown-gpt-translator`
-   - `${CWD}/.env`
-   - `${HOME}/.config/markdown-gpt-translator/config`
-   - `${HOME}/.markdown-gpt-translator`
+   - `$CWD/.markdown-gpt-translator`
+   - `$CWD/.env`
+   - `$HOME/.config/markdown-gpt-translator/config`
+   - `$HOME/.markdown-gpt-translator`
 
-5. Create the prompt file. You can copy this [`prompt-example.md`](https://raw.githubusercontent.com/smikitky/markdown-gpt-translator/main/prompt-example.md) to one of the following locations and edit its contents. At least, you need to specify the language name. The contents of this file will be included in each API call, so you can write instructions to ChatGPT in a natural language.
+5. Create a prompt file. You can copy this [`prompt-example.md`](https://raw.githubusercontent.com/smikitky/markdown-gpt-translator/main/prompt-example.md) to one of the following locations and edit its contents. At least, you need to specify the language name. The contents of this file will be included in each API call, so you can write instructions to ChatGPT in a natural language.
 
-   - `${CWD}/prompt.md`
-   - `${CWD}/.prompt.md`
-   - `${HOME}/.config/markdown-gpt-translator/prompt.md`
-   - `${HOME}/.markdown-gpt-translator-prompt.md`
+   - `$CWD/prompt.md`
+   - `$CWD/.prompt.md`
+   - `$HOME/.config/markdown-gpt-translator/prompt.md`
+   - `$HOME/.markdown-gpt-translator-prompt.md`
 
 6. Run `markdown-gpt-translator [file-to-translate.md]`. The Markdown file will be overwritten, so make sure it is in a VCS.
 
@@ -38,15 +38,20 @@ In addition to `OPENAI_API_TOKEN`, you can set several values in the config file
 
 ### Model (`MODEL_NAME`)
 
-Set it to one of `gpt-4`, `gpt-4-32k` or `gpt-3.5-turbo`. This is the setting that has the greatest impact on translation accuracy (and price!).
+Set it to one of the models accepted by the OpenAI API. Usually it's one of these:
 
-As of May 2023, the GPT-4 model is in a limited beta. If you are not granted access yet, you'll get an error saying the model 'gpt-4' does not exist. [Join the waitlist](https://openai.com/waitlist/gpt-4-api).
+- `gpt-4` (`4`)
+- `gpt-4-32k` (`4large`)
+- `gpt-3.5-turbo` (`3`)
+- `gpt-3.5-turbo-16k` (`3large`)
+
+Shortcuts (in brackets) are available. This is the setting that has the greatest impact on translation accuracy (and price!). If you try to access a model to which you don't have access yet, you will get an error saying that model 'XYZ' does not exist.
 
 Although GPT-4 is much smarter, it is slower and &gt;10 times more expensive than GPT-3. Try using the GPT-3 model first, especially while you are experimenting with this tool. It's recommended to set the usage limit to a reasonable amount (e.g., $10) on the OpenAI's account management page.
 
 ### Fragment Size (`FRAGMENT_TOKEN_SIZE`)
 
-Since ChatGPT cannot handle long texts, this program works by splitting a given Markdown file into multiple parts (fragments), passing them to the API along with the instruction (`prompt.md`) in parallel, and combining the translated results. It also removes code blocks before passing the contents to the API and restores them after the translation (this means nothing inside clode blocks will be translated).
+Since ChatGPT cannot handle long texts, this program works by splitting a given Markdown file into multiple parts (fragments), passing them to the API along with the prompt in parallel, and combining the translated results. It also removes code blocks before passing the contents to the API and restores them after the translation (this means nothing inside clode blocks will be translated).
 
 The `-f` option (or `FRAGMENT_TOKEN_SIZE` env) determines the (soft) maximum length of each fragment. The default is 2048 (in string `.length`). The appropriate value depends on several factors:
 
@@ -63,20 +68,24 @@ On the other hand, splitting the text into too small fragments can result in a l
 
 This controls the randomness of the output. See the [official API docs](https://platform.openai.com/docs/api-reference/completions/create#completions/create-temperature). The default is `0.1`, which is intentionally much lower than the original ChatGPT API default (`1.0`). Since this tool works by splitting a file, too much randomness can lead to inconsistent translations. Experience suggests that a high value also increases the risk of breaking the markups or ignoring the instructions.
 
+### API Call Interval (`API_CALL_INTERVAL`)
+
+We will not call the API more frequently than this value (in seconds) to avoid [these rate limits](https://platform.openai.com/docs/guides/rate-limits/what-are-the-rate-limits-for-our-api). The default is 0, which means the API tries to translate all fragments simultaneously. This is especially useful when you're translating a huge file or when you're still a free trial user.
+
 ## CLI Options
 
-These can be used to override the settings in `.env`.
+These can be used to override the settings in the config file.
 
-Example: `npx ts-node-esm index.ts -m 4 -f 1000 learn/thinking-in-react.md`
+Example: `markdown-gpt-translator -m 4 -f 1000 learn/thinking-in-react.md`
 
-- `-m <model>`: Sets the language model (one of 'gpt-4', 'gpt-4-32k' or 'gpt-3.5-turbo'). Shorthands are available ('4', '4large' and '3', respectively).
+- `-m <model>`: Sets the language model.
 - `-f <length>`: Sets the fragment size (in string length).
 - `-t <temperature>`: Sets the "temperature", or the randomness of the output.
-- `-i <seconds>`: Sets the API call interval. We will not call the API more frequently than this value (in seconds). The default is 0, which means the API tries to translate all fragments simultaneously. This is especially useful when you're translating a huge file, or when you're still a free trial user.
+- `-i <seconds>`: Sets the API call interval.
 
 ## Limitations
 
-- This tool does not do serious Markdown parsing for fragment splitting. The algorithm may fail on an atypical source file that has large _indented_ code blocks, has no line breaks, or has no blank lines.
+- This tool does not do serious Markdown parsing for fragment splitting. The algorithm may fail on an atypical source file that has large _indented_ code blocks, has no line breaks, or has no or very few blank lines.
 - The tool has not been tested with Markdown files outside of React Docs (react.dev), although I expect most potential problems can be solved by tweaking `instruction.md`.
 - Contents in code blocks (\`\`\`), including comments, are not translated.
 - The combination of this tool and GPT-4 should do 80% of the translation job, but be sure to review the result at your own responsibility. It sometimes ignores your instruction or outputs invalid Markdown, most of which are easily detectable and fixable with tools like VS Code's diff editor.

@@ -1,4 +1,4 @@
-import minimist from 'minimist';
+import dashdash from 'dashdash';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import configureApiCaller, { ApiCaller } from './api.js';
@@ -68,14 +68,29 @@ const translateOne = async (
   return (res as { translation: string }).translation;
 };
 
+const options = [
+  { names: ['model', 'm'], type: 'string', help: 'Model to use.' },
+  { names: ['fragment-size', 'f'], type: 'number', help: 'Fragment size.' },
+  { names: ['temperature', 't'], type: 'number', help: 'Temperature.' },
+  { names: ['interval', 'i'], type: 'number', help: 'API call interval.' },
+  { names: ['help', 'h'], type: 'bool', help: 'Print this help.' }
+];
+
 const main = async () => {
-  const args = minimist(process.argv.slice(2));
+  const parser = dashdash.createParser({ options });
+  const args = parser.parse();
+
+  if (args.help) {
+    console.log('Usage: markdown-gpt-translator [options] <file>');
+    console.log(parser.help());
+    return;
+  }
 
   const config = await loadConfig(args);
 
-  if (args._.length !== 1)
+  if (args._args.length !== 1)
     throw new Error('Specify one (and only one) markdown file.');
-  const file = args._[0];
+  const file = args._args[0];
   const filePath = path.resolve(config.baseDir, file);
   const markdown = await readTextFile(filePath);
 
