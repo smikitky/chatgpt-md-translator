@@ -1,8 +1,8 @@
 import minimist from 'minimist';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import configureApiCaller, { ApiCaller, ApiOptions } from './api.js';
-import { loadConfig } from './loadConfig.js';
+import configureApiCaller, { ApiCaller } from './api.js';
+import { Config, loadConfig } from './loadConfig.js';
 import {
   replaceCodeBlocks,
   restoreCodeBlocks,
@@ -14,8 +14,7 @@ import { Status, statusToText } from './status.js';
 const translateMultiple = async (
   callApi: ApiCaller,
   fragments: string[],
-  instruction: string,
-  apiOptions: ApiOptions,
+  config: Config,
   onStatus: (status: Status) => void
 ) => {
   const statuses: Status[] = new Array(fragments.length).fill(0).map(() => ({
@@ -33,13 +32,7 @@ const translateMultiple = async (
   };
   const results = await Promise.all(
     fragments.map((fragment, index) =>
-      translateOne(
-        callApi,
-        fragment,
-        instruction,
-        apiOptions,
-        handleNewStatus(index)
-      )
+      translateOne(callApi, fragment, config, handleNewStatus(index))
     )
   );
   const finalResult = results.join('\n\n');
@@ -50,12 +43,11 @@ const translateMultiple = async (
 const translateOne = async (
   callApi: ApiCaller,
   text: string,
-  instruction: string,
-  apiOptions: ApiOptions,
+  config: Config,
   onStatus: (status: Status) => void
 ): Promise<string> => {
   onStatus({ status: 'waiting' });
-  const res = await callApi(text, instruction, apiOptions, onStatus);
+  const res = await callApi(text, config, onStatus);
 
   if (
     res.status === 'error' &&
@@ -69,13 +61,7 @@ const translateOne = async (
     );
     console.log('\n\n');
     if (splitResult === null) return text; // perhaps code blocks only
-    return await translateMultiple(
-      callApi,
-      splitResult,
-      instruction,
-      apiOptions,
-      onStatus
-    );
+    return await translateMultiple(callApi, splitResult, config, onStatus);
   }
 
   if (res.status === 'error') throw new Error(res.message);
@@ -89,10 +75,8 @@ const main = async () => {
 
   if (args._.length !== 1)
     throw new Error('Specify one (and only one) markdown file.');
-  const file = args._[0] as string;
-
+  const file = args._[0];
   const filePath = path.resolve(config.baseDir, file);
-
   const markdown = await readTextFile(filePath);
 
   const { output: replacedMd, codeBlocks } = replaceCodeBlocks(markdown);
@@ -117,8 +101,7 @@ const main = async () => {
   const translatedText = await translateMultiple(
     callApi,
     fragments,
-    config.prompt,
-    { model: config.model, temperature: config.temperature },
+    config,
     newStatus => {
       status = newStatus;
       printStatus();

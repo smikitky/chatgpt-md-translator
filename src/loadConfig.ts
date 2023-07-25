@@ -17,7 +17,7 @@ export interface Config {
   temperature: number;
 }
 
-const searchFile = async (paths: string[]): Promise<string | null> => {
+const searchFile = async (paths: string[]) => {
   for (const path of paths) {
     try {
       await fs.access(path);
@@ -29,25 +29,21 @@ const searchFile = async (paths: string[]): Promise<string | null> => {
   return null;
 };
 
-export const searchConfigFile = async (): Promise<string | null> => {
-  const envPaths = [
+export const searchConfigFile = () =>
+  searchFile([
     path.join(process.cwd(), '.markdown-gpt-translator'),
     path.join(process.cwd(), '.env'),
     path.join(homeDir, '.config', 'markdown-gpt-translator', 'config'),
     path.join(homeDir, '.markdown-gpt-translator')
-  ];
-  return await searchFile(envPaths);
-};
+  ]);
 
-export const searchPromptFile = async (): Promise<string | null> => {
-  const promptPaths = [
+export const searchPromptFile = () =>
+  searchFile([
     path.join(process.cwd(), 'prompt.md'),
     path.join(process.cwd(), '.prompt.md'),
     path.join(homeDir, '.config', 'markdown-gpt-translator', 'prompt.md'),
     path.join(homeDir, '.markdown-gpt-translator-prompt.md')
-  ];
-  return await searchFile(promptPaths);
-};
+  ]);
 
 const resolveModelShorthand = (model: string): string => {
   const shorthands: { [key: string]: string } = {
