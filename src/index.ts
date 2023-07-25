@@ -1,6 +1,7 @@
 import dashdash from 'dashdash';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
+import pc from 'picocolors';
 import configureApiCaller, { ApiCaller } from './api.js';
 import { Config, loadConfig } from './loadConfig.js';
 import {
@@ -81,7 +82,7 @@ const main = async () => {
   const args = parser.parse();
 
   if (args.help) {
-    console.log('Usage: markdown-gpt-translator [options] <file>');
+    console.log(pc.yellow('Usage: markdown-gpt-translator [options] <file>'));
     console.log(parser.help());
     return;
   }
@@ -99,8 +100,14 @@ const main = async () => {
 
   let status: Status = { status: 'pending', lastToken: '' };
 
-  console.log(`Translating ${file}...\n`);
-  console.log(`Model: ${config.model}, Temperature: ${config.temperature}\n\n`);
+  console.log(pc.cyan(`Translating ${filePath}...`));
+  console.log(
+    pc.bold('Model:'),
+    config.model + ',',
+    pc.bold('Temperature:'),
+    String(config.temperature),
+    '\n\n'
+  );
   const printStatus = () => {
     process.stdout.write('\x1b[1A\x1b[2K'); // clear previous line
     console.log(statusToText(status));
@@ -126,7 +133,11 @@ const main = async () => {
   const finalResult = restoreCodeBlocks(translatedText, codeBlocks) + '\n';
 
   await fs.writeFile(filePath, finalResult, 'utf-8');
-  console.log(`\nTranslation done! Saved to ${filePath}.`);
+  console.log(`\n${pc.green('Translation done!')} Saved to ${filePath}.`);
 };
 
-main().catch(console.error);
+main().catch(err => {
+  console.error(pc.bgRed('Error'), pc.red(err.message));
+  console.error(pc.gray(err.stack.split('\n').slice(1).join('\n')));
+  process.exit(1);
+});

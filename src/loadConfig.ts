@@ -59,12 +59,11 @@ export const loadConfig = async (args: any): Promise<Config> => {
   const configPath = await searchConfigFile();
   if (!configPath) throw new Error('Config file not found.');
   const conf = parse(await readTextFile(configPath));
+  if (!conf.OPENAI_API_KEY)
+    throw new Error('OPENAI_API_KEY is not set in config file.');
 
   const promptPath = await searchPromptFile();
   if (!promptPath) throw new Error('Prompt file not found.');
-
-  if (!conf.OPENAI_API_KEY)
-    throw new Error('OPENAI_API_KEY is not set in config file.');
 
   return {
     apiKey: conf.OPENAI_API_KEY,

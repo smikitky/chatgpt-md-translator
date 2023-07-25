@@ -7,8 +7,5 @@
     "module": "es2022",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true
-  },
-  "ts-node": {
-    "esm": true
   }
 }
