@@ -18,6 +18,10 @@
   ],
   "author": "Soichiro Miki <smiki-tky@umin.ac.jp>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smikitky/markdown-gpt-translator"
+  },
   "type": "module",
   "dependencies": {
     "dashdash": "^2.0.0",
