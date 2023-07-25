@@ -13,18 +13,28 @@ This tool itself is free, but you will be charged according to [OpenAI's pricing
 
 ## Usage
 
-For now, this is an experimental project and has not been published to NPM. But this also means you can hack the script instantly!
-
 1. Make sure you have a recent version of Node.js installed.
-2. Clone this repository from GitHub, `cd` into it, and run `npm install` (or `npm ci`).
+2. Run `npm install --global markdown-gpt-translator`.
 3. Go to [OpenAI's developer section](https://platform.openai.com/overview), sign up, register _your own_ credit card, and generate an API key.
-4. Copy `env-example` as `.env` and configure. You need to add at least your API key.
-5. Copy `prompt-example.md` as `prompt.md`, and edit its contents. At least, you need to specify the language name. The contents of this file are included in each API call, so you can write instructions to ChatGPT in a natural language.
-6. Run `npx ts-node-esm index.ts [file-to-translate.md]`. The Markdown file will be overwritten, so make sure it is in a VCS.
+4. Create the config file. To do so, use [this template](https://github.com/smikitky/markdown-gpt-translator/blob/main/env-example) and save it to one of the following locations (CWD refers to the directory where this tool is invoked). You need to add at least your API key.
+
+   - `${CWD}/.markdown-gpt-translator`
+   - `${CWD}/.env`
+   - `${HOME}/.config/markdown-gpt-translator/config`
+   - `${HOME}/.markdown-gpt-translator`
+
+5. Create the prompt file. You can copy this [`prompt-example.md`](https://raw.githubusercontent.com/smikitky/markdown-gpt-translator/main/prompt-example.md) to one of the following locations and edit its contents. At least, you need to specify the language name. The contents of this file will be included in each API call, so you can write instructions to ChatGPT in a natural language.
+
+   - `${CWD}/prompt.md`
+   - `${CWD}/.prompt.md`
+   - `${HOME}/.config/markdown-gpt-translator/prompt.md`
+   - `${HOME}/.markdown-gpt-translator-prompt.md`
+
+6. Run `markdown-gpt-translator [file-to-translate.md]`. The Markdown file will be overwritten, so make sure it is in a VCS.
 
 ## Configuration
 
-In addition to `OPENAI_API_TOKEN`, you can set several values in `.env`. Only important ones are described below. See the `.env-example` for the full list.
+In addition to `OPENAI_API_TOKEN`, you can set several values in the config file. Only important ones are described below. See the `.env-example` for the full list.
 
 ### Model (`MODEL_NAME`)
 

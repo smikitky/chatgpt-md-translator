@@ -1,12 +1,21 @@
 {
   "name": "markdown-gpt-translator",
-  "version": "0.3.0",
+  "version": "1.0.0-alpha.1",
   "description": "Translates Markdown using ChatGPT API",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "bin": {
+    "markdown-gpt-translator": "lib/index.js"
+  },
   "scripts": {
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "cli",
+    "markdown",
+    "chatgpt",
+    "translator"
+  ],
   "author": "Soichiro Miki <smiki-tky@umin.ac.jp>",
   "license": "MIT",
   "type": "module",
