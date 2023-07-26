@@ -77,20 +77,25 @@ const options = [
   { names: ['help', 'h'], type: 'bool', help: 'Print this help.' }
 ];
 
+const printHelp = (parser: dashdash.Parser) => {
+  console.log(pc.yellow('Usage: markdown-gpt-translator [options] <file>'));
+  console.log(parser.help());
+  console.log('Docs: https://github.com/smikitky/markdown-gpt-translator\n');
+};
+
 const main = async () => {
   const parser = dashdash.createParser({ options });
   const args = parser.parse();
 
-  if (args.help) {
-    console.log(pc.yellow('Usage: markdown-gpt-translator [options] <file>'));
-    console.log(parser.help());
+  if (args.help || args._args.length !== 1) {
+    if (args._args.length !== 1)
+      console.log(pc.red('Specify one (and only one) markdown file.'));
+    printHelp(parser);
     return;
   }
 
   const config = await loadConfig(args);
 
-  if (args._args.length !== 1)
-    throw new Error('Specify one (and only one) markdown file.');
   const file = args._args[0];
   const filePath = path.resolve(config.baseDir, file);
   const markdown = await readTextFile(filePath);
