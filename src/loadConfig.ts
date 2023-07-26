@@ -17,7 +17,7 @@ export interface Config {
   httpsProxy?: string;
 }
 
-const searchFile = async (paths: string[]) => {
+const findFile = async (paths: string[]) => {
   for (const path of paths) {
     try {
       await fs.access(path);
@@ -29,16 +29,16 @@ const searchFile = async (paths: string[]) => {
   return null;
 };
 
-export const searchConfigFile = () =>
-  searchFile([
+export const findConfigFile = () =>
+  findFile([
     path.join(process.cwd(), '.markdown-gpt-translator'),
     path.join(process.cwd(), '.env'),
     path.join(homeDir, '.config', 'markdown-gpt-translator', 'config'),
     path.join(homeDir, '.markdown-gpt-translator')
   ]);
 
-export const searchPromptFile = () =>
-  searchFile([
+export const findPromptFile = () =>
+  findFile([
     path.join(process.cwd(), 'prompt.md'),
     path.join(process.cwd(), '.prompt.md'),
     path.join(homeDir, '.config', 'markdown-gpt-translator', 'prompt.md'),
@@ -56,13 +56,13 @@ const resolveModelShorthand = (model: string): string => {
 };
 
 export const loadConfig = async (args: any): Promise<Config> => {
-  const configPath = await searchConfigFile();
+  const configPath = await findConfigFile();
   if (!configPath) throw new Error('Config file not found.');
   const conf = parse(await readTextFile(configPath));
   if (!conf.OPENAI_API_KEY)
     throw new Error('OPENAI_API_KEY is not set in config file.');
 
-  const promptPath = await searchPromptFile();
+  const promptPath = await findPromptFile();
   if (!promptPath) throw new Error('Prompt file not found.');
 
   return {
