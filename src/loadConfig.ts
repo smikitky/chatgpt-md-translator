@@ -13,8 +13,8 @@ export interface Config {
   baseDir: string;
   apiCallInterval: number;
   fragmentSize: number;
-  httpsProxy?: string;
   temperature: number;
+  httpsProxy?: string;
 }
 
 const searchFile = async (paths: string[]) => {
@@ -73,10 +73,8 @@ export const loadConfig = async (args: any): Promise<Config> => {
     apiCallInterval:
       Number(args.interval) || Number(conf.API_CALL_INTERVAL) || 0,
     fragmentSize:
-      Number(args.fragment_size) ||
-      Number(process.env.FRAGMENT_TOKEN_SIZE) ||
-      2048,
-    httpsProxy: conf.HTTPS_PROXY,
-    temperature: Number(args.temperature) || Number(conf.TEMPERATURE) || 0.1
+      Number(args.fragment_size) || Number(conf.FRAGMENT_TOKEN_SIZE) || 2048,
+    temperature: Number(args.temperature) || Number(conf.TEMPERATURE) || 0.1,
+    httpsProxy: conf.HTTPS_PROXY ?? process.env.HTTPS_PROXY
   };
 };

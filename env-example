@@ -13,6 +13,7 @@ OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxx"
 # PROMPT_FILE="prompt.md"
 
 # HTTPS Proxy (e.g, "https://proxy.example.com:8080")
+# We also read HTTPS_PROXY from regular environment variables.
 # HTTPS_PROXY=""
 
 # Default language model.
