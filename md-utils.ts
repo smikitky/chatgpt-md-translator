@@ -13,7 +13,7 @@ interface ReplaceResult {
  * @returns Markdown content with code blocks replaced with placeholders.
  */
 export const replaceCodeBlocks = (mdContent: string): ReplaceResult => {
-  const codeBlockRegex = /(```.*\n[\s\S]*?\n```)/g;
+  const codeBlockRegex = / {0,}(```.*\n[\s\S]*?\n {0,}```)/g;
   const codeBlocks: CodeBlocks = {};
   const output = mdContent.replace(codeBlockRegex, match => {
     const lines = match.split('\n');
