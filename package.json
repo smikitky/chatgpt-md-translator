@@ -1,6 +1,6 @@
 {
   "name": "chatgpt-md-translator",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Markdown Translator with ChatGPT",
   "main": "lib/index.js",
   "bin": {
