@@ -1,6 +1,6 @@
-## 1.0.0
+## 1.0.0 (2023-08-31)
 
-This will be the first version released on NPM. It's now published as a standaline CLI tool that can be installed with `npm install -g`.
+This is the first version released on NPM. It's now published as a standalone CLI tool that can be installed with `npm install -g`.
 
 **BREAKING**
 
