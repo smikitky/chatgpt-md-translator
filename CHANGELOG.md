@@ -1,6 +1,10 @@
+## 1.0.2 (2023-08-31)
+
+Removed unnecessary dependencies.
+
 ## 1.0.1 (2023-08-31)
 
-Critical fix for 'bin' executables
+Critical fix for 'bin' executables.
 
 ## 1.0.0 (2023-08-31)
 
