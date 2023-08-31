@@ -3,3 +3,4 @@ prompt.md
 src
 *.tgz
 tsconfig.json
+lib/*.test.js

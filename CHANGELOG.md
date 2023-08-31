@@ -1,3 +1,7 @@
+## 1.0.1 (2023-08-31)
+
+Critical fix for 'bin' executables
+
 ## 1.0.0 (2023-08-31)
 
 This is the first version released on NPM. It's now published as a standalone CLI tool that can be installed with `npm install -g`.

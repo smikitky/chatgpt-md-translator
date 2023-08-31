@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import dashdash from 'dashdash';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
