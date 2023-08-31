@@ -45,7 +45,7 @@ const main = async () => {
 
   let status: Status = { status: 'pending', lastToken: '' };
 
-  console.log(pc.cyan(`Translating ${filePath}...`));
+  console.log(pc.cyan(`Translating: ${filePath}`));
   console.log(
     pc.bold('Model:'),
     config.model + ',',
