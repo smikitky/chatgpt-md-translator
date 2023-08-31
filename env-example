@@ -1,4 +1,13 @@
-# Copy this as `.env` (Don't forget the dot in front of the filename!)
+# Copy this to one of these locations based on your usage:
+
+# Use the current working directory ($CWD) if you need a separate 
+# config for each project that you are working on:
+# `$CWD/.chatgpt-md-translator`
+# `$CWD/.env`
+
+# Reference $HOME if you need one config for your projects
+# $HOME/.config/chatgpt-md-translator/config
+# $HOME/.chatgpt-md-translator
 
 # OpenAI's API Key. You will be charged for the usage of this key.
 OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxx"
