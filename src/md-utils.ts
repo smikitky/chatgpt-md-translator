@@ -12,15 +12,18 @@ interface ReplaceResult {
  * @param mdContent - Markdown content.
  * @returns Markdown content with code blocks replaced with placeholders.
  */
-export const replaceCodeBlocks = (mdContent: string): ReplaceResult => {
-  const codeBlockRegex = /(```.*\n[\s\S]*?\n```)/g;
+export const replaceCodeBlocks = (
+  mdContent: string,
+  minLines = 5
+): ReplaceResult => {
+  const codeBlockRegex = /(\s*)```.*\n\1([\s\S]*?)\n\1```/g;
   const codeBlocks: CodeBlocks = {};
-  const output = mdContent.replace(codeBlockRegex, match => {
+  const output = mdContent.replace(codeBlockRegex, (match, indent, content) => {
     const lines = match.split('\n');
-    if (lines.length >= 5) {
-      const id = crypto.randomBytes(3).toString('hex');
-      codeBlocks[id] = match;
-      return `${lines[0]}\n(((((${id})))))\n\`\`\``;
+    if (lines.length >= minLines) {
+      const id = crypto.randomBytes(8).toString('hex');
+      codeBlocks[id] = content;
+      return `${lines[0]}\n${indent}(((((${id})))))\n${indent}\`\`\``;
     } else return match;
   });
   return { output, codeBlocks };
@@ -36,11 +39,10 @@ export const restoreCodeBlocks = (
   mdContent: string,
   codeBlocks: CodeBlocks
 ): string => {
-  const placeholderRegex = /```(.*?)\n\(\(\(\(\(([a-z0-9]+)\)\)\)\)\)\n```/g;
-  return mdContent.replace(
-    placeholderRegex,
-    (_, lang, id) => codeBlocks[id] ?? '(code block not found)'
-  );
+  const placeholderRegex = /\(\(\(\(\(([a-z0-9]+)\)\)\)\)\)/g;
+  return mdContent.replace(placeholderRegex, (match, id) => {
+    return codeBlocks[id] ?? match;
+  });
 };
 
 /**
