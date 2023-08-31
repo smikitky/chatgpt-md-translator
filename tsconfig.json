@@ -1,12 +1,11 @@
 {
   "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./lib",
     "strict": true,
-    "target": "es2015",
+    "target": "es2020",
     "module": "es2022",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true
-  },
-  "ts-node": {
-    "esm": true
   }
 }

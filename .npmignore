@@ -1,0 +1,5 @@
+.env
+prompt.md
+src
+*.tgz
+tsconfig.json

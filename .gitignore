@@ -1,5 +1,6 @@
 node_modules
-dist
+lib
 .env
 prompt*.md
 !prompt-example.md
+*.tgz

@@ -1,12 +1,8 @@
+import { HttpsProxyAgent } from 'https-proxy-agent';
 import fetch from 'node-fetch';
 import * as rl from 'node:readline';
+import { Config } from './loadConfig.js';
 import { Status } from './status.js';
-import { HttpsProxyAgent } from 'https-proxy-agent';
-
-export type ApiOptions = {
-  model: string;
-  temperature: number;
-};
 
 export type ErrorResponse = {
   error: {
@@ -29,15 +25,14 @@ export type ApiStreamResponse = {
 
 export type ApiCaller = (
   text: string,
-  instruction: string,
-  apiOptions: ApiOptions,
+  config: Config,
   onStatus: (status: Status) => void,
   maxRetry?: number
 ) => Promise<Status>;
 
 /**
  * Takes an async function and returns a new function
- * that can only be started once per interval
+ * that can only be started once per interval.
  */
 const limitCallRate = <T extends (...args: any[]) => Promise<any>>(
   func: T,
@@ -82,12 +77,11 @@ const configureApiCaller = (options: ConfigureApiOptions) => {
 
   const callApi: ApiCaller = async (
     text,
-    instruction,
-    apiOptions,
+    config,
     onStatus,
     maxRetry = 5
   ): Promise<Status> => {
-    const { model, temperature } = apiOptions;
+    const { prompt, model, temperature } = config;
     const agent = httpsProxy ? new HttpsProxyAgent(httpsProxy) : undefined;
     const ac = new AbortController();
 
@@ -108,7 +102,7 @@ const configureApiCaller = (options: ConfigureApiOptions) => {
             role: 'system',
             content: 'You are a translator for Markdown documents.'
           },
-          { role: 'user', content: instruction },
+          { role: 'user', content: prompt },
           {
             role: 'assistant',
             content:
@@ -123,7 +117,7 @@ const configureApiCaller = (options: ConfigureApiOptions) => {
 
     const retry = () => {
       onStatus({ status: 'pending', lastToken: `(Retrying ${maxRetry})` });
-      return callApi(text, instruction, apiOptions, onStatus, maxRetry - 1);
+      return callApi(text, config, onStatus, maxRetry - 1);
     };
 
     let intervalId: NodeJS.Timeout | undefined;
