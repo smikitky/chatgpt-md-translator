@@ -28,13 +28,13 @@
     "dotenv": "^16.0.3",
     "https-proxy-agent": "^6.2.0",
     "node-fetch": "^3.3.1",
-    "picocolors": "^1.0.0",
-    "typescript": "^5.0.4"
+    "picocolors": "^1.0.0"
   },
   "devDependencies": {
     "@types/dashdash": "^1.14.1",
-    "@types/node": "^18.15.3",
-    "prettier": "^2.8.4"
+    "@types/node": "^20.5.7",
+    "prettier": "^2.8.4",
+    "typescript": "^5.2.2"
   },
   "prettier": {
     "singleQuote": true,
