@@ -14,14 +14,14 @@ This tool itself is free, but you will be charged according to [OpenAI's pricing
 ## Usage
 
 1. Make sure you have a recent version of Node.js installed.
-2. Run `npm install --global markdown-gpt-translator`.
+2. Run `npm install --global chatgpt-md-translator`.
 3. Go to [OpenAI's developer section](https://platform.openai.com/overview), sign up, register _your own_ credit card, and generate an API key.
-4. Create a **config** file in the dotenv format. Use [this template](https://github.com/smikitky/markdown-gpt-translator/blob/main/env-example) and save it to one of the following locations ($CWD refers to the directory where this tool will be invoked).
+4. Create a **config** file in the dotenv format. Use [this template](https://github.com/smikitky/chatgpt-md-translator/blob/main/env-example) and save it to one of the following locations ($CWD refers to the directory where this tool will be invoked).
 
-   - `$CWD/.markdown-gpt-translator`
+   - `$CWD/.chatgpt-md-translator`
    - `$CWD/.env`
-   - `$HOME/.config/markdown-gpt-translator/config`
-   - `$HOME/.markdown-gpt-translator`
+   - `$HOME/.config/chatgpt-md-translator/config`
+   - `$HOME/.chatgpt-md-translator`
 
    At least, you need to specify your API key as `OPENAI_API_KEY`.
 
@@ -29,10 +29,10 @@ This tool itself is free, but you will be charged according to [OpenAI's pricing
 
    - `$CWD/prompt.md`
    - `$CWD/.prompt.md`
-   - `$HOME/.config/markdown-gpt-translator/prompt.md`
-   - `$HOME/.markdown-gpt-translator-prompt.md`
+   - `$HOME/.config/chatgpt-md-translator/prompt.md`
+   - `$HOME/.chatgpt-md-translator-prompt.md`
 
-6. Run `markdown-gpt-translator [file-to-translate.md]`. The Markdown file will be overwritten, so make sure it is in a VCS.
+6. Run `chatgpt-md-translator [file-to-translate.md]`. The Markdown file will be overwritten, so make sure it is in a VCS.
 
 **TIP:** If you want to store the config and prompt files in a git-managed directory, you'll probably want to ignore them using `$GITDIR/info/exclude` instead of `.gitignore`.
 
@@ -87,7 +87,7 @@ Example: `markdown-gpt-translator -m 4 -f 1000 learn/thinking-in-react.md`
 
 ## Limitations
 
-- This tool does not do serious Markdown parsing for fragment splitting. The algorithm may fail on an atypical source file that has large _indented_ code blocks, has no line breaks, or has no or very few blank lines.
+- This tool does not do serious Markdown parsing for fragment splitting. The algorithm may fail on an atypical source file that has no or very few blank lines.
 - The tool has not been tested with Markdown files outside of React Docs (react.dev), although I expect most potential problems can be solved by tweaking `instruction.md`.
 - Content in code blocks (\`\`\`), including comments, will not be translated. Code blocks are removed before an API call and restored after translation.
 - The combination of this tool and GPT-4 should do 80% of the translation job, but be sure to review the result at your own responsibility. It sometimes ignores your instruction or outputs invalid Markdown, most of which are easily detectable and fixable with tools like VS Code's diff editor.

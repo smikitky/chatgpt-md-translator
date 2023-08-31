@@ -31,18 +31,18 @@ const findFile = async (paths: string[]) => {
 
 export const findConfigFile = () =>
   findFile([
-    path.join(process.cwd(), '.markdown-gpt-translator'),
+    path.join(process.cwd(), '.chatgpt-md-translator'),
     path.join(process.cwd(), '.env'),
-    path.join(homeDir, '.config', 'markdown-gpt-translator', 'config'),
-    path.join(homeDir, '.markdown-gpt-translator')
+    path.join(homeDir, '.config', 'chatgpt-md-translator', 'config'),
+    path.join(homeDir, '.chatgpt-md-translator')
   ]);
 
 export const findPromptFile = () =>
   findFile([
     path.join(process.cwd(), 'prompt.md'),
     path.join(process.cwd(), '.prompt.md'),
-    path.join(homeDir, '.config', 'markdown-gpt-translator', 'prompt.md'),
-    path.join(homeDir, '.markdown-gpt-translator-prompt.md')
+    path.join(homeDir, '.config', 'chatgpt-md-translator', 'prompt.md'),
+    path.join(homeDir, '.chatgpt-md-translator-prompt.md')
   ]);
 
 const resolveModelShorthand = (model: string): string => {

@@ -1,10 +1,10 @@
 {
-  "name": "markdown-gpt-translator",
+  "name": "chatgpt-md-translator",
   "version": "1.0.0-alpha.1",
-  "description": "Markdown GPT Translator: Translates Markdown using ChatGPT API",
+  "description": "Markdown Translator with ChatGPT",
   "main": "lib/index.js",
   "bin": {
-    "markdown-gpt-translator": "lib/index.js"
+    "chatgpt-md-translator": "lib/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -20,7 +20,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/smikitky/markdown-gpt-translator"
+    "url": "https://github.com/smikitky/chatgpt-md-translator"
   },
   "type": "module",
   "dependencies": {
