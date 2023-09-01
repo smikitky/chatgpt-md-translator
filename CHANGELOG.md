@@ -1,10 +1,16 @@
+## 1.1.0 (2023-09-01)
+
+- Added `CODE_BLOCK_PRESERVATION_LINES` config option.
+- Added `OUT_SUFFIX` config option.
+- Added `out` CLI option.
+
 ## 1.0.2 (2023-08-31)
 
-Removed unnecessary dependencies.
+- Removed unnecessary dependencies.
 
 ## 1.0.1 (2023-08-31)
 
-Critical fix for 'bin' executables.
+- Critical fix for 'bin' executables.
 
 ## 1.0.0 (2023-08-31)
 
