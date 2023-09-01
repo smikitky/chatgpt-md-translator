@@ -14,13 +14,13 @@ interface ReplaceResult {
  */
 export const replaceCodeBlocks = (
   mdContent: string,
-  minLines = 5
+  preservationLines = 5
 ): ReplaceResult => {
   const codeBlockRegex = /(\s*)```.*\n\1([\s\S]*?)\n\1```/g;
   const codeBlocks: CodeBlocks = {};
   const output = mdContent.replace(codeBlockRegex, (match, indent, content) => {
     const lines = match.split('\n');
-    if (lines.length >= minLines) {
+    if (lines.length > preservationLines) {
       const id = crypto.randomBytes(8).toString('hex');
       codeBlocks[id] = content;
       return `${lines[0]}\n${indent}(((((${id})))))\n${indent}\`\`\``;

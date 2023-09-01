@@ -14,6 +14,9 @@ export interface Config {
   apiCallInterval: number;
   fragmentSize: number;
   temperature: number;
+  codeBlockPreservationLines: number;
+  out: string | null;
+  outSuffix: string | null;
   httpsProxy?: string;
 }
 
@@ -75,6 +78,14 @@ export const loadConfig = async (args: any): Promise<Config> => {
     fragmentSize:
       Number(args.fragment_size) || Number(conf.FRAGMENT_TOKEN_SIZE) || 2048,
     temperature: Number(args.temperature) || Number(conf.TEMPERATURE) || 0.1,
+    codeBlockPreservationLines: Number(conf.CODE_BLOCK_PRESERVATION_LINES) || 5,
+    out: args.out?.length > 0 ? args.out : null,
+    outSuffix:
+      conf.OUT_SUFFIX?.length > 0
+        ? conf.OUT_SUFFIX
+        : args.out_suffix?.length > 0
+        ? args.out_suffix
+        : null,
     httpsProxy: conf.HTTPS_PROXY ?? process.env.HTTPS_PROXY
   };
 };

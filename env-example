@@ -1,11 +1,7 @@
 # Copy this to one of these locations based on your usage:
-
-# Use the current working directory ($CWD) if you need a separate 
-# config for each project that you are working on:
-# `$CWD/.chatgpt-md-translator`
-# `$CWD/.env`
-
-# Reference $HOME if you need one config for your projects
+#
+# $CWD/.chatgpt-md-translator
+# $CWD/.env
 # $HOME/.config/chatgpt-md-translator/config
 # $HOME/.chatgpt-md-translator
 
@@ -37,3 +33,10 @@ OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxx"
 # If you hit the API rate limit, you can set this to a positive number.
 # API is not called more frequently than the given interval (in seconds).
 # API_CALL_INTERVAL=0
+
+# The maximum number of lines for code blocks
+# sent to the API verbatim for context.
+# CODE_BLOCK_PRESERVATION_LINES=5
+
+# Suffixes to be added after the translated file.
+# OUTPUT_SUFFIX=""

@@ -32,7 +32,7 @@ This tool itself is free, but you will be charged according to [OpenAI's pricing
    - `$HOME/.config/chatgpt-md-translator/prompt.md`
    - `$HOME/.chatgpt-md-translator-prompt.md`
 
-6. Run `chatgpt-md-translator [file-to-translate.md]`. The Markdown file will be overwritten, so make sure it is in a VCS.
+6. Run `chatgpt-md-translator [file-to-translate.md]`. By default, the Markdown file will be overwritten, so make sure it is in a VCS.
 
 **TIP:** If you want to store the config and prompt files in a git-managed directory, you'll probably want to ignore them using `$GITDIR/info/exclude` instead of `.gitignore`.
 
@@ -42,7 +42,7 @@ In addition to `OPENAI_API_TOKEN`, you can set several values in the config file
 
 ### Model (`MODEL_NAME`)
 
-Set it to one of the models accepted by the OpenAI API. Usually it's one of these:
+Set this to one of the models accepted by the OpenAI API. Usually it's one of these:
 
 - `gpt-4` (`4`)
 - `gpt-4-32k` (`4large`)
@@ -68,11 +68,23 @@ On the other hand, splitting the text into too small fragments can result in a l
 
 ### Temperature (`TEMPERATURE`)
 
-This controls the randomness of the output. See the [official API docs](https://platform.openai.com/docs/api-reference/completions/create#completions/create-temperature). The default is `0.1`, which is intentionally much lower than the original ChatGPT API default (`1.0`). Since this tool works by splitting a file, too much randomness can lead to inconsistent translations. Experience suggests that a high value also increases the risk of breaking the markups or ignoring the instructions.
+This controls the randomness of the output. See the [official API docs](https://platform.openai.com/docs/api-reference/completions/create#completions/create-temperature). The default is `0.1`, which is intentionally much lower than the original ChatGPT API default (`1.0`). Since this tool works by splitting a file, too much randomness can lead to inconsistent translations. Experience suggests that a high value also increases the risk of breaking markups or ignoring your instructions.
 
 ### API Call Interval (`API_CALL_INTERVAL`)
 
-We will not call the API more frequently than this value (in seconds) to avoid [these rate limits](https://platform.openai.com/docs/guides/rate-limits/what-are-the-rate-limits-for-our-api). The default is 0, which means the API tries to translate all fragments simultaneously. This is especially useful when you're translating a huge file or when you're still a free trial user.
+The tool will not call the API more frequently than this value (in seconds) to avoid [these rate limits](https://platform.openai.com/docs/guides/rate-limits/what-are-the-rate-limits-for-our-api). The default is 0, which means the API tries to translate all fragments simultaneously. This is especially useful when you're translating a huge file or when you're still a free trial user.
+
+### Code Block Preservation (`CODE_BLOCK_PRESERVATION_LINES`)
+
+Code blocks usually don't need to be translated, so code blocks that are longer than the number of lines specified by this option will be replaced with a dummy string before being sent to the API, saving you time and money. They will be restored after translation.
+
+Short code blocks (up to 5 lines by default) are sent as-is to give the API a better context for translation. If you want to replace all code blocks, specify `0`. If you don't want this feature (for example, if you want to translate comments in code examples), you can specify a large value like `1000`. But code blocks will never be split into fragments, so be mindful of the token limit!
+
+### Output File Name Suffix (`OUT_SUFFIX`)
+
+By default, the input file will be overwritten with the translated content. If you prefer to save the new content under a different name, you can specify this suffix. The original extention will be removed before the suffix is added. For example, if you specify `"-es.md"` and the input file name is `"index.md"`, the translated file will be saved as `"index-es.md"`.
+
+You can also explicitly specify a full filename with the `--out` CLI option. If this is set, the suffix option will be ignored.
 
 ## CLI Options
 
@@ -84,11 +96,11 @@ Example: `markdown-gpt-translator -m 4 -f 1000 learn/thinking-in-react.md`
 - `-f NUM`, `--fragment-size=NUM`: Sets the fragment size (in string length).
 - `-t NUM`, `--temperature=NUM`: Sets the "temperature", or the randomness of the output.
 - `-i NUM`, `--interval=NUM`: Sets the API call interval.
+- `-o NAME`, `--out=NAME`: Explicitly sets the output file name. If set, the `OUT_SUFFIX` setting will be ignored.
+- `--out-suffix=NAME`: Output file suffix. See above.
 
 ## Limitations
 
 - This tool does not do serious Markdown parsing for fragment splitting. The algorithm may fail on an atypical source file that has no or very few blank lines.
 - The tool has not been tested with Markdown files outside of React Docs (react.dev), although I expect most potential problems can be solved by tweaking `instruction.md`.
-- Content in code blocks (\`\`\`), including comments, will not be translated. Code blocks are removed before an API call and restored after translation.
 - The combination of this tool and GPT-4 should do 80% of the translation job, but be sure to review the result at your own responsibility. It sometimes ignores your instruction or outputs invalid Markdown, most of which are easily detectable and fixable with tools like VS Code's diff editor.
-- The API is sometimes unstable. If you experience frequent connection errors, reduce the fragment size or try again a few hours later.

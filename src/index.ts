@@ -20,6 +20,8 @@ const options = [
   { names: ['fragment-size', 'f'], type: 'number', help: 'Fragment size.' },
   { names: ['temperature', 't'], type: 'number', help: 'Temperature.' },
   { names: ['interval', 'i'], type: 'number', help: 'API call interval.' },
+  { names: ['out', 'o'], type: 'string', help: 'Output file.' },
+  { names: ['out-suffix'], type: 'string', help: 'Output file suffix.' },
   { names: ['help', 'h'], type: 'bool', help: 'Print this help.' }
 ];
 
@@ -42,7 +44,10 @@ const main = async () => {
   const filePath = path.resolve(config.baseDir, file);
   const markdown = await readTextFile(filePath);
 
-  const { output: replacedMd, codeBlocks } = replaceCodeBlocks(markdown);
+  const { output: replacedMd, codeBlocks } = replaceCodeBlocks(
+    markdown,
+    config.codeBlockPreservationLines
+  );
   const fragments = splitStringAtBlankLines(replacedMd, config.fragmentSize)!;
 
   let status: Status = { status: 'pending', lastToken: '' };
@@ -79,8 +84,14 @@ const main = async () => {
 
   const finalResult = restoreCodeBlocks(translatedText, codeBlocks) + '\n';
 
-  await fs.writeFile(filePath, finalResult, 'utf-8');
-  console.log(`\n${pc.green('Translation done!')} Saved to ${filePath}.`);
+  let outFile = filePath;
+  if (config.out) {
+    outFile = path.resolve(path.dirname(filePath), config.out);
+  } else if (config.outSuffix) {
+    outFile = outFile.replace(/\.[a-zA-Z0-9]+$/, '') + config.outSuffix;
+  }
+  await fs.writeFile(outFile, finalResult, 'utf-8');
+  console.log(`\n${pc.green('Translation done!')} Saved as ${outFile}.`);
 };
 
 main().catch(err => {
