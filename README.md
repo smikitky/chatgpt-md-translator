@@ -58,11 +58,11 @@ Although GPT-4 is much smarter, it is slower and &gt;10 times more expensive tha
 Since ChatGPT cannot handle long texts, this program works by splitting a given Markdown file into multiple parts (fragments), passing them to the API along with the prompt in parallel, and combining the translated results. This option determines the (soft) maximum length of each fragment. The default is 2048 (in string `.length`). The optimal value depends on several factors:
 
 - **Model**: Each model has a defined upper limit on the number of _tokens_. Read [OpenAI's explanation about tokens](https://platform.openai.com/docs/introduction/tokens).
-- **Target Language**: Some languages are tokenized less effectively than others, which can limit the size of each fragment.
-- **Prompt File Size**: The prompt will be sent as input along with the Markdown file to translate. The longer the instruction is, the shorter each fragment has to be.
-- **Desired Processing Time**: Splitting into smaller sizes allows for parallel processing and faster completion.
+- **Target language**: Some languages are tokenized less effectively than others, which can limit the size of each fragment.
+- **Prompt file size**: The prompt will be sent as input along with the Markdown file to translate. The longer the instruction is, the shorter each fragment has to be.
+- **Desired processing time**: Splitting into smaller sizes allows for parallel processing and faster completion.
 
-Setting a value that is too large can result in longer processing time, and in worse cases, the transfer of the translated text may stop midway. If this happens, the program will automatically split the fragment in half and try again recursively. But you should avoid this as it can waste both your time and money.
+Setting a value that is too large can result in longer processing time, and in worse cases, the transfer of the translated text may stop midway. If this happens, the program will automatically split the fragment in half and try again recursively. Try to avoid this as it can waste both your time and money.
 
 On the other hand, splitting the text into too small fragments can result in a loss of term consistency or accuracy in the translation, since there is less context available for each translation process.
 
@@ -80,11 +80,12 @@ Code blocks usually don't need to be translated, so code blocks that are longer 
 
 Short code blocks (up to 5 lines by default) are sent as-is to give the API a better context for translation. If you want to replace all code blocks, specify `0`. If you don't want this feature (for example, if you want to translate comments in code examples), you can specify a large value like `1000`. But code blocks will never be split into fragments, so be mindful of the token limit!
 
-### Output File Name Suffix (`OUT_SUFFIX`)
+### Output File Name
 
-By default, the input file will be overwritten with the translated content. If you prefer to save the new content under a different name, you can specify this suffix. The original extention will be removed before the suffix is added. For example, if you specify `"-es.md"` and the input file name is `"index.md"`, the translated file will be saved as `"index-es.md"`.
+By default, the input file will be overwritten with the translated content. If you prefer to save the new content under a different name, you can do so in two ways:
 
-You can also explicitly specify a full filename with the `--out` CLI option. If this is set, the suffix option will be ignored.
+- You can explicitly specify the output file name in command line, like `-o translated.md` or `--out=translated.md`.
+- Alternatively, you can specify `OUT_SUFFIX` in the config file. The original extention will be removed, and this suffix will be added. For example, if you specify `"-es.md"` and the input file name is `"index.md"`, the translated file will be saved as `"index-es.md"`.
 
 ## CLI Options
 
@@ -101,6 +102,6 @@ Example: `markdown-gpt-translator -m 4 -f 1000 learn/thinking-in-react.md`
 
 ## Limitations
 
-- This tool does not do serious Markdown parsing for fragment splitting. The algorithm may fail on an atypical source file that has no or very few blank lines.
+- This tool does not perform serious Markdown parsing for fragment splitting. The algorithm may fail on an atypical source file that has no or very few blank lines.
 - The tool has not been tested with Markdown files outside of React Docs (react.dev), although I expect most potential problems can be solved by tweaking `instruction.md`.
 - The combination of this tool and GPT-4 should do 80% of the translation job, but be sure to review the result at your own responsibility. It sometimes ignores your instruction or outputs invalid Markdown, most of which are easily detectable and fixable with tools like VS Code's diff editor.

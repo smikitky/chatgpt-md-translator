@@ -1,5 +1,6 @@
 <!--
-Copy this file as `prompt.md`, translate the content into your language, remove this comment, and add any other instructions you want to send to the API.
+Copy this file with any of the file names specified in README.
+Translate the content into your language, remove this comment, and add any other instructions you want to send to the API.
 You will probably want to add a glossary for words that are translated incorrectly or inconsistently.
 -->
 

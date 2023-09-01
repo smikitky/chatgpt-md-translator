@@ -9,13 +9,12 @@
 OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 
-# The remaining variables are optional ================================
+# =====================================
+# The remaining variables are optional.
+# =====================================
 
 # Base directory of the translated content.
-# BASE_DIR="/path/to/lang.react.dev/src/content"
-
-# Prompt file to use for the translation.
-# PROMPT_FILE="prompt.md"
+# BASE_DIR="/path/to/my/docs-project/src/content"
 
 # HTTPS Proxy (e.g, "https://proxy.example.com:8080")
 # We also read HTTPS_PROXY from regular environment variables.
@@ -35,7 +34,7 @@ OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxx"
 # API_CALL_INTERVAL=0
 
 # The maximum number of lines for code blocks
-# sent to the API verbatim for context.
+# sent to the API as-is for context.
 # CODE_BLOCK_PRESERVATION_LINES=5
 
 # Suffixes to be added after the translated file.
