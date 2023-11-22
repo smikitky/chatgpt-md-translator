@@ -46,6 +46,7 @@ Set this to one of the models accepted by the OpenAI API. Usually it's one of th
 
 - `gpt-4` (`4`)
 - `gpt-4-32k` (`4large`)
+- `gpt-4-1106-preview`: See the notes below
 - `gpt-3.5-turbo` (`3`)
 - `gpt-3.5-turbo-16k` (`3large`)
 
@@ -65,6 +66,9 @@ Since ChatGPT cannot handle long texts, this program works by splitting a given 
 Setting a value that is too large can result in longer processing time, and in worse cases, the transfer of the translated text may stop midway. If this happens, the program will automatically split the fragment in half and try again recursively. Try to avoid this as it can waste both your time and money.
 
 On the other hand, splitting the text into too small fragments can result in a loss of term consistency or accuracy in the translation, since there is less context available for each translation process.
+
+> [!TIP]
+> The `gpt-4-1106-preview` model, released in November 2023, supports a massive context window, effectively allowing for unlimited prompt file size. However, since the size of the output is limited to 4,096 tokens, the size of the input text is limited accordingly. Splitting a long article remains a useful approach.
 
 ### Temperature (`TEMPERATURE`)
 
