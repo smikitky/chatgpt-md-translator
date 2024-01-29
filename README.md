@@ -103,7 +103,6 @@ Example: `markdown-gpt-translator -m 4 -f 1000 learn/thinking-in-react.md`
 - `-i NUM`, `--interval=NUM`: Sets the API call interval.
 - `-o NAME`, `--out=NAME`: Explicitly sets the output file name. If set, the `OUT_SUFFIX` setting will be ignored.
 - `--out-suffix=NAME`: Output file suffix. See above.
-- `-a ADDRESS`, `--api-address=ADDRESS`: Sets custom API address.
 
 ## Limitations
 
