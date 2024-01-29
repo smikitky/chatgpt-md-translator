@@ -17,6 +17,7 @@ import { translateMultiple } from './translate.js';
 
 const options = [
   { names: ['model', 'm'], type: 'string', help: 'Model to use.' },
+  { names: ['api-address', 'a'], type: 'string', help: 'Customized API address'},
   { names: ['fragment-size', 'f'], type: 'number', help: 'Fragment size.' },
   { names: ['temperature', 't'], type: 'number', help: 'Temperature.' },
   { names: ['interval', 'i'], type: 'number', help: 'API call interval.' },
@@ -67,6 +68,7 @@ const main = async () => {
   printStatus();
 
   const callApi = configureApiCaller({
+    apiAddress: config.apiAddress,
     apiKey: config.apiKey,
     rateLimit: config.apiCallInterval,
     httpsProxy: config.httpsProxy
