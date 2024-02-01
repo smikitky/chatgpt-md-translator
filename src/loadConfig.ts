@@ -7,7 +7,7 @@ import readTextFile from './readTextFile.js';
 const homeDir = os.homedir();
 
 export interface Config {
-  apiEndpoint?: string;
+  apiEndpoint: string;
   apiKey: string;
   prompt: string;
   model: string;
