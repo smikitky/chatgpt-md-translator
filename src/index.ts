@@ -67,6 +67,7 @@ const main = async () => {
   printStatus();
 
   const callApi = configureApiCaller({
+    apiAddress: config.apiAddress,
     apiKey: config.apiKey,
     rateLimit: config.apiCallInterval,
     httpsProxy: config.httpsProxy

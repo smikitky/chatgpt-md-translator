@@ -67,13 +67,14 @@ const limitCallRate = <T extends (...args: any[]) => Promise<any>>(
 };
 
 export type ConfigureApiOptions = {
+  apiAddress?: string;
   apiKey: string;
   rateLimit?: number;
   httpsProxy?: string;
 };
 
 const configureApiCaller = (options: ConfigureApiOptions) => {
-  const { apiKey, rateLimit = 0, httpsProxy } = options;
+  const { apiAddress = 'https://api.openai.com/v1', apiKey, rateLimit = 0, httpsProxy } = options;
 
   const callApi: ApiCaller = async (
     text,
@@ -86,7 +87,7 @@ const configureApiCaller = (options: ConfigureApiOptions) => {
     const ac = new AbortController();
 
     onStatus({ status: 'pending', lastToken: '' });
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch(`${apiAddress}/chat/completions`, {
       agent,
       method: 'POST',
       headers: {
