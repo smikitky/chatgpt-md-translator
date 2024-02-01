@@ -41,5 +41,5 @@ OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxx"
 # OUTPUT_SUFFIX=""
 
 # Custom API address, to integrate with a third-party API service provider.
-# default is OpenAI's API endpoint: https://api.openai.com/v1
-# API_ADDRESS="https://xxxxx.com/v1"
+# default is OpenAI's API endpoint: https://api.openai.com/v1/chat/completions
+# API_ENDPOINT="https://xxxxx.com/v1/chat/completions"

@@ -7,7 +7,7 @@ import readTextFile from './readTextFile.js';
 const homeDir = os.homedir();
 
 export interface Config {
-  apiAddress: string | undefined;
+  apiEndpoint?: string;
   apiKey: string;
   prompt: string;
   model: string;
@@ -70,7 +70,8 @@ export const loadConfig = async (args: any): Promise<Config> => {
   if (!promptPath) throw new Error('Prompt file not found.');
 
   return {
-    apiAddress: conf.API_ADDRESS,
+    apiEndpoint:
+      conf.API_ENDOPOINT ?? 'https://api.openai.com/v1/chat/completions',
     apiKey: conf.OPENAI_API_KEY,
     prompt: await readTextFile(promptPath),
     model: resolveModelShorthand(args.model ?? conf.MODEL_NAME ?? 3),
