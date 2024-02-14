@@ -2,6 +2,8 @@
 
 This tool translates a Markdown file into another (natural) language by using OpenAI's ChatGPT API. Its main purpose is to help people translate docs sites for open-source libraries.
 
+![Screenshot](docs/screenshot.webp)
+
 As an example, this is React Tutorial translated into Japanese with this tool: [チュートリアル：三目並べ](https://ja-react-8aa88t4yk-fbopensource.vercel.app/learn/tutorial-tic-tac-toe)
 
 As compared to other translation services, ChatGPT is well suited for translating technical documents for several reasons:

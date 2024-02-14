@@ -1,3 +1,7 @@
+## 1.2.0 (2024-02-02)
+
+- Added `API_ENDPOINT` config option.
+
 ## 1.1.0 (2023-09-01)
 
 - Added `CODE_BLOCK_PRESERVATION_LINES` config option.
