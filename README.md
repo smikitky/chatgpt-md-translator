@@ -36,7 +36,8 @@ This tool itself is free, but you will be charged according to [OpenAI's pricing
 
 6. Run `chatgpt-md-translator [file-to-translate.md]`. By default, the Markdown file will be overwritten, so make sure it is in a VCS.
 
-**TIP:** If you want to store the config and prompt files in a git-managed directory, you'll probably want to ignore them using `$GITDIR/info/exclude` instead of `.gitignore`.
+> [!TIP]
+> If you want to store the config and prompt files in a git-managed directory, you'll probably want to ignore these files using `$GITDIR/info/exclude` instead of `.gitignore`.
 
 ## Configuration
 
@@ -65,16 +66,16 @@ Since ChatGPT cannot handle long texts, this program works by splitting a given 
 - **Prompt file size**: The prompt will be sent as input along with the Markdown file to translate. The longer the instruction is, the shorter each fragment has to be.
 - **Desired processing time**: Splitting into smaller sizes allows for parallel processing and faster completion.
 
-Setting a value that is too large can result in longer processing time, and in worse cases, the transfer of the translated text may stop midway. If this happens, the program will automatically split the fragment in half and try again recursively. Try to avoid this as it can waste both your time and money.
+Setting a value that is too large can result in longer processing time, and in worse cases, the transfer of the translated text may stop midway. If this happens, the program will automatically split the fragment in half and try again recursively. Try to avoid this as it can waste your time and money.
 
 On the other hand, splitting the text into too small fragments can result in a loss of term consistency or accuracy in the translation, since there is less context available for each translation process.
 
 > [!TIP]
-> The `gpt-4-1106-preview` model, released in November 2023, supports a massive context window, effectively allowing for unlimited prompt file size. However, since the size of the output is limited to 4,096 tokens, the size of the input text is limited accordingly. Splitting a long article remains a useful approach.
+> The `gpt-4-1106-preview` model, released in November 2023, supports a massive context window, effectively allowing for unlimited prompt file size. However, since the _output_ token size is still limited to 4,096, the size of the input text is limited accordingly. Splitting a long article remains a useful approach.
 
 ### Temperature (`TEMPERATURE`)
 
-This controls the randomness of the output. See the [official API docs](https://platform.openai.com/docs/api-reference/completions/create#completions/create-temperature). The default is `0.1`, which is intentionally much lower than the original ChatGPT API default (`1.0`). Since this tool works by splitting a file, too much randomness can lead to inconsistent translations. Experience suggests that a high value also increases the risk of breaking markups or ignoring your instructions.
+This controls the randomness of the output. See the [official API docs](https://platform.openai.com/docs/api-reference/chat/create#chat-create-temperature). The default is `0.1`, which is intentionally much lower than the original ChatGPT API default (`1.0`). Since this tool works by splitting a file, too much randomness can lead to inconsistent translations. Experience suggests that a high value also increases the risk of breaking markups or ignoring your instructions.
 
 ### API Call Interval (`API_CALL_INTERVAL`)
 
@@ -106,8 +107,9 @@ Example: `markdown-gpt-translator -m 4 -f 1000 learn/thinking-in-react.md`
 - `-o NAME`, `--out=NAME`: Explicitly sets the output file name. If set, the `OUT_SUFFIX` setting will be ignored.
 - `--out-suffix=NAME`: Output file suffix. See above.
 
-## Limitations
+## Limitations and Pitfalls
 
-- This tool does not perform serious Markdown parsing for fragment splitting. The algorithm may fail on an atypical source file that has no or very few blank lines.
-- The tool has not been tested with Markdown files outside of React Docs (react.dev), although I expect most potential problems can be solved by tweaking `instruction.md`.
+- Use only "Chat" models. InstructGPT models such as "text-davinci-001" are not supported.
+- This tool does not perform serious Markdown parsing for fragment splitting. The algorithm may fail on an atypical source file that has no or very few blank lines. However, this also means that most Markdown dialects can be handled without any configuration. If this tool makes mistakes for certain custom markups, it can likely be addressed with tweaking your prompt file.
+- Actually, this tool does not perform any Markdown-specific processing other than code block detection, so it may also handle plain text or Wiki-style documents.
 - The combination of this tool and GPT-4 should do 80% of the translation job, but be sure to review the result at your own responsibility. It sometimes ignores your instruction or outputs invalid Markdown, most of which are easily detectable and fixable with tools like VS Code's diff editor.
