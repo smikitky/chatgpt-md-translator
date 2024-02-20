@@ -13,6 +13,7 @@ export interface Config {
   model: string;
   baseDir: string;
   apiCallInterval: number;
+  quiet: boolean;
   fragmentSize: number;
   temperature: number;
   codeBlockPreservationLines: number;
@@ -83,6 +84,7 @@ export const loadConfig = async (args: any): Promise<Config> => {
     model: resolveModelShorthand(args.model ?? conf.MODEL_NAME ?? '3'),
     baseDir: conf.BASE_DIR ?? process.cwd(),
     apiCallInterval: toNum(args.interval) ?? toNum(conf.API_CALL_INTERVAL) ?? 0,
+    quiet: args.quiet ?? false,
     fragmentSize:
       toNum(args.fragment_size) ?? toNum(conf.FRAGMENT_TOKEN_SIZE) ?? 2048,
     temperature: toNum(args.temperature) ?? toNum(conf.TEMPERATURE) ?? 0.1,

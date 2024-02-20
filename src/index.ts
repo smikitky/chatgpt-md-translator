@@ -20,6 +20,7 @@ const options = [
   { names: ['fragment-size', 'f'], type: 'number', help: 'Fragment size.' },
   { names: ['temperature', 't'], type: 'number', help: 'Temperature.' },
   { names: ['interval', 'i'], type: 'number', help: 'API call interval.' },
+  { names: ['quiet', 'q'], type: 'bool', help: 'Suppress status messages.' },
   { names: ['out', 'o'], type: 'string', help: 'Output file.' },
   { names: ['out-suffix'], type: 'string', help: 'Output file suffix.' },
   { names: ['help', 'h'], type: 'bool', help: 'Print this help.' }
@@ -58,9 +59,10 @@ const main = async () => {
     config.model + ',',
     pc.bold('Temperature:'),
     String(config.temperature),
-    '\n\n'
+    '\n'
   );
   const printStatus = () => {
+    if (args.quiet) return;
     process.stdout.write('\x1b[1A\x1b[2K'); // clear previous line
     console.log(statusToText(status));
   };
@@ -73,6 +75,7 @@ const main = async () => {
     httpsProxy: config.httpsProxy
   });
 
+  const startTime = Date.now();
   const translatedText = await translateMultiple(
     callApi,
     fragments,
@@ -84,6 +87,13 @@ const main = async () => {
   );
 
   const finalResult = restoreCodeBlocks(translatedText, codeBlocks) + '\n';
+  const elapsedTime = Date.now() - startTime;
+  const formatTime = (msec: number) =>
+    msec < 60000
+      ? `${Math.floor(msec / 1000)} second${msec >= 2000 ? 's' : ''}`
+      : `${Math.floor(msec / 60000)}:${String(
+          Math.floor((msec % 60000) / 1000)
+        ).padStart(2, '0')}`;
 
   let outFile = filePath;
   if (config.out) {
@@ -92,7 +102,8 @@ const main = async () => {
     outFile = outFile.replace(/\.[a-zA-Z0-9]+$/, '') + config.outSuffix;
   }
   await fs.writeFile(outFile, finalResult, 'utf-8');
-  console.log(`\n${pc.green('Translation done!')} Saved as ${outFile}.`);
+  console.log(pc.green(`Translation completed in ${formatTime(elapsedTime)}.`));
+  console.log(`File saved as ${outFile}.`);
 };
 
 main().catch(err => {
