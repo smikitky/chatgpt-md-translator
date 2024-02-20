@@ -4,3 +4,4 @@ src
 *.tgz
 tsconfig.json
 lib/*.test.js
+docs
