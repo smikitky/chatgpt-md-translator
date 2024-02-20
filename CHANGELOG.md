@@ -1,3 +1,7 @@
+## 1.3.1 (2024-02-21)
+
+- Fixed help message.
+
 ## 1.3.0 (2024-02-21)
 
 - Fixed a bug where some config values could not be set to zero.
