@@ -1,3 +1,9 @@
+## 1.3.0 (2024-02-21)
+
+- Fiexed a bug where some config values could not be set to zero.
+- Added `-q`/`--quiet` CLI option.
+- The tool no supresses progress output by default when not in TTY.
+
 ## 1.2.0 (2024-02-02)
 
 - Added `API_ENDPOINT` config option.
