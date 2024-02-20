@@ -69,19 +69,24 @@ export const loadConfig = async (args: any): Promise<Config> => {
   const promptPath = await findPromptFile();
   if (!promptPath) throw new Error('Prompt file not found.');
 
+  const toNum = (input: any) => {
+    if (input === undefined || input === null) return undefined;
+    const num = Number(input);
+    return isNaN(num) ? undefined : num;
+  };
+
   return {
     apiEndpoint:
       conf.API_ENDOPOINT ?? 'https://api.openai.com/v1/chat/completions',
     apiKey: conf.OPENAI_API_KEY,
     prompt: await readTextFile(promptPath),
-    model: resolveModelShorthand(args.model ?? conf.MODEL_NAME ?? 3),
+    model: resolveModelShorthand(args.model ?? conf.MODEL_NAME ?? '3'),
     baseDir: conf.BASE_DIR ?? process.cwd(),
-    apiCallInterval:
-      Number(args.interval) || Number(conf.API_CALL_INTERVAL) || 0,
+    apiCallInterval: toNum(args.interval) ?? toNum(conf.API_CALL_INTERVAL) ?? 0,
     fragmentSize:
-      Number(args.fragment_size) || Number(conf.FRAGMENT_TOKEN_SIZE) || 2048,
-    temperature: Number(args.temperature) || Number(conf.TEMPERATURE) || 0.1,
-    codeBlockPreservationLines: Number(conf.CODE_BLOCK_PRESERVATION_LINES) || 5,
+      toNum(args.fragment_size) ?? toNum(conf.FRAGMENT_TOKEN_SIZE) ?? 2048,
+    temperature: toNum(args.temperature) ?? toNum(conf.TEMPERATURE) ?? 0.1,
+    codeBlockPreservationLines: toNum(conf.CODE_BLOCK_PRESERVATION_LINES) ?? 5,
     out: args.out?.length > 0 ? args.out : null,
     outSuffix:
       conf.OUT_SUFFIX?.length > 0
