@@ -78,7 +78,7 @@ export const loadConfig = async (args: any): Promise<Config> => {
 
   return {
     apiEndpoint:
-      conf.API_ENDOPOINT ?? 'https://api.openai.com/v1/chat/completions',
+      conf.API_ENDPOINT ?? 'https://api.openai.com/v1/chat/completions',
     apiKey: conf.OPENAI_API_KEY,
     prompt: await readTextFile(promptPath),
     model: resolveModelShorthand(args.model ?? conf.MODEL_NAME ?? '3'),
