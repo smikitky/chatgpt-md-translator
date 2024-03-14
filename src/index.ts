@@ -97,7 +97,7 @@ const main = async () => {
 
   let outFile = filePath;
   if (config.out) {
-    outFile = path.resolve(path.dirname(filePath), config.out);
+    outFile = path.resolve(config.baseDir, config.out);
   } else if (config.outSuffix) {
     outFile = outFile.replace(/\.[a-zA-Z0-9]+$/, '') + config.outSuffix;
   }
