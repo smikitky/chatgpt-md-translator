@@ -1,3 +1,7 @@
+## 1.3.2 (2024-03-14)
+
+- Fixed a typo in config name `API_ENDOPOINT` => `API_ENDPOINT`
+
 ## 1.3.1 (2024-02-21)
 
 - Fixed help message.
