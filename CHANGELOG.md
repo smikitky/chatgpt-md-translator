@@ -1,6 +1,11 @@
+## 1.4.0 (2024-03-30)
+
+- Checks the permission of the output file/directory before actually calling the API (#17).
+- Fixed: `out` CLI option is now relative to BASE_DIR rather than the target file, following starndard convention of other CLI tools (#16).
+
 ## 1.3.2 (2024-03-14)
 
-- Fixed a typo in config name `API_ENDOPOINT` => `API_ENDPOINT`
+- Fixed a typo in config name `API_ENDOPOINT` => `API_ENDPOINT` (#15)
 
 ## 1.3.1 (2024-02-21)
 
