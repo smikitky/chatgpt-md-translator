@@ -11,7 +11,7 @@ import {
   restoreCodeBlocks,
   splitStringAtBlankLines
 } from './md-utils.js';
-import readTextFile from './readTextFile.js';
+import { checkFileWritable, readTextFile } from './fs-utils.js';
 import { Status, statusToText } from './status.js';
 import { translateMultiple } from './translate.js';
 
@@ -45,6 +45,16 @@ const main = async () => {
   const filePath = path.resolve(config.baseDir, file);
   const markdown = await readTextFile(filePath);
 
+  let outFile = filePath;
+  if (config.out) {
+    outFile = path.resolve(config.baseDir, config.out);
+  } else if (config.outSuffix) {
+    outFile = outFile.replace(/\.[a-zA-Z0-9]+$/, '') + config.outSuffix;
+  }
+  if (!(await checkFileWritable(outFile))) {
+    throw new Error('Output file is not writable: ' + outFile);
+  }
+
   const { output: replacedMd, codeBlocks } = replaceCodeBlocks(
     markdown,
     config.codeBlockPreservationLines
@@ -54,6 +64,8 @@ const main = async () => {
   let status: Status = { status: 'pending', lastToken: '' };
 
   console.log(pc.cyan(`Translating: ${filePath}`));
+  if (filePath !== outFile) console.log(pc.cyan(`To: ${outFile}`));
+
   console.log(
     pc.bold('Model:'),
     config.model + ',',
@@ -95,12 +107,6 @@ const main = async () => {
           Math.floor((msec % 60000) / 1000)
         ).padStart(2, '0')}`;
 
-  let outFile = filePath;
-  if (config.out) {
-    outFile = path.resolve(config.baseDir, config.out);
-  } else if (config.outSuffix) {
-    outFile = outFile.replace(/\.[a-zA-Z0-9]+$/, '') + config.outSuffix;
-  }
   await fs.writeFile(outFile, finalResult, 'utf-8');
   console.log(pc.green(`Translation completed in ${formatTime(elapsedTime)}.`));
   console.log(`File saved as ${outFile}.`);
