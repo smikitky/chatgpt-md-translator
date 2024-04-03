@@ -34,14 +34,14 @@ export type ApiCaller = (
  * Takes an async function and returns a new function
  * that can only be started once per interval.
  */
-const limitCallRate = <T extends (...args: any[]) => Promise<any>>(
-  func: T,
+const limitCallRate = <P extends any[], R>(
+  func: (...args: P) => Promise<R>,
   interval: number
-): T => {
+): ((...args: P) => Promise<R>) => {
   const queue: {
-    args: Parameters<T>;
-    resolve: (result: Awaited<ReturnType<T>>) => void;
-    reject: (reason: any) => void;
+    args: P;
+    resolve: (result: R) => void;
+    reject: (reason: unknown) => void;
   }[] = [];
   let processing = false;
 
@@ -58,12 +58,12 @@ const limitCallRate = <T extends (...args: any[]) => Promise<any>>(
     setTimeout(processQueue, interval * 1000);
   };
 
-  return ((...args: Parameters<T>) => {
-    return new Promise<Awaited<ReturnType<T>>>((resolve, reject) => {
+  return (...args: P) => {
+    return new Promise<R>((resolve, reject) => {
       queue.push({ args, resolve, reject });
       if (!processing) processQueue();
     });
-  }) as T;
+  };
 };
 
 export type ConfigureApiOptions = {
