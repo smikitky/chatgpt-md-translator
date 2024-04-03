@@ -34,6 +34,7 @@
     "@types/dashdash": "^1.14.1",
     "@types/node": "^20.5.7",
     "prettier": "^2.8.4",
+    "tsx": "^4.7.1",
     "typescript": "^5.2.2"
   },
   "prettier": {
