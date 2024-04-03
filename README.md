@@ -36,9 +36,6 @@ This tool itself is free, but you will be charged according to [OpenAI's pricing
 
 6. Run `chatgpt-md-translator [file-to-translate.md]`. By default, the Markdown file will be overwritten, so make sure it is in a VCS.
 
-> [!TIP]
-> If you want to store the config and prompt files in a git-managed directory, you'll probably want to ignore these files using `$GITDIR/info/exclude` instead of `.gitignore`.
-
 ## Configuration
 
 In addition to `OPENAI_API_TOKEN`, you can set several values in the config file. Only important ones are described below. See the `.env-example` for the full list.
@@ -55,7 +52,7 @@ Set this to one of the models accepted by the OpenAI API. Usually it's one of th
 
 Shortcuts (in brackets) are available. This is the setting that has the greatest impact on translation accuracy (and price!). If you try to access a model to which you don't have access yet, you will get an error saying that model 'XYZ' does not exist.
 
-Although GPT-4 is much smarter, it is slower and &gt;10 times more expensive than GPT-3. Try using the GPT-3 model first, especially while you are experimenting with this tool. It's recommended to set the usage limit to a reasonable amount (e.g., $10) on the OpenAI's account management page.
+Although GPT-4 is much smarter, it is slower and much more expensive than GPT-3. Try using the GPT-3 model first, especially while you are experimenting with this tool. It's recommended to set the usage limit to a reasonable amount (e.g., $10) on the OpenAI's account management page.
 
 ### Fragment Size (`FRAGMENT_TOKEN_SIZE`)
 
@@ -89,16 +86,14 @@ Short code blocks (up to 5 lines by default) are sent as-is to give the API a be
 
 ### Output File Name (`OUTPUT_FILE_PATTERN`)
 
-By default, the content of the input file will be overwritten with the translated content. If you prefer to save the new content in a different directory or under a different filename, you can specify a pattern to transform the input path into the output path.
-
-For example, when the input file is `/projects/abc/docs/tutorial/index.md`, you can set `OUTPUT_FILE_PATTERN="{dir}/i18n/{basename}-es.md"` to write the translated content to `/projects/abc/docs/tutorial/i18n/index-es.md`. The following placeholders are available:
+By default, the content of the input file will be overwritten with the translated content. If you prefer to save the new content in a different directory or as a different file name, you can specify a pattern to transform the input path into the output path. For example, when the input file is `/projects/abc/docs/tutorial/index.md`, you can set `OUTPUT_FILE_PATTERN="{dir}/i18n/{basename}-es.md"` to write the translated content to `/projects/abc/docs/tutorial/i18n/index-es.md`. Ensure the target directory has been created beforehand. The following placeholders are available:
 
 - `{dir}`: `/projects/abc/docs/tutorial` (absolute directory path)
-- `{main}`: `/projects/abc/docs/tutorial/index` (entire path minus the extension)
 - `{filename}`: `index.md`
-- `{basename}`: `index` (the filename without the extension)
+- `{basename}`: `index` (filename without extension)
+- `{main}`: `/projects/abc/docs/tutorial/index` (dir + basename)
 - `{ext}`: `md`
-- When `BASE_DIR` is defined in the config file:
+- Additionally, when `BASE_DIR` is defined in the config file:
   - `{basedir}`: `/projects/abc/docs` (the `BASE_DIR` itself)
   - `{reldir}`: `tutorial` (relative to `BASE_DIR`)
   - `{relmain}`: `tutorial/index` (relative to `BASE_DIR`)
