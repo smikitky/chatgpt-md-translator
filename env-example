@@ -14,7 +14,6 @@ OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxx"
 # =====================================
 
 # Base directory of the translated content.
-# If set, files paths including --out path will be relative to this.
 # BASE_DIR="/path/to/my/docs-project/content"
 
 # HTTPS Proxy (e.g, "https://proxy.example.com:8080")
@@ -38,8 +37,8 @@ OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxx"
 # sent to the API as-is for context.
 # CODE_BLOCK_PRESERVATION_LINES=5
 
-# Suffixes to be added after the translated file.
-# OUTPUT_SUFFIX=""
+# Transforms the input path to the output file path.
+# OUTPUT_FILE_PATTERN=""
 
 # Custom API address, to integrate with a third-party API service provider.
 # API_ENDPOINT="https://api.openai.com/v1/chat/completions"
