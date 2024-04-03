@@ -32,8 +32,8 @@ export const checkFileWritable = async (filePath: string): Promise<void> => {
         await fs.access(dirPath, fs.constants.F_OK | fs.constants.W_OK);
         // Directory exists and is writable
         return;
-      } catch (dirError) {
-        if (error.code === 'ENOENT') {
+      } catch (dirError: any) {
+        if (dirError.code === 'ENOENT') {
           // Directory does not exist
           throw new Error('Directory does not exist: ' + dirPath);
         }
