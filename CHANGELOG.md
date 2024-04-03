@@ -1,3 +1,8 @@
+## 1.5.1 (2024-04-03)
+
+- Fixed error handling when chekcing if the output file is writable
+- Hid a deprecated and undocumented CLI option from `--help`.
+
 ## 1.5.0 (2024-04-03)
 
 - Added `OUTPUT_FILE_PATH` option, which can flexibly transform the input file path into the output file path.
