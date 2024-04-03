@@ -1,3 +1,9 @@
+## 1.5.0 (2024-04-03)
+
+- Added `OUTPUT_FILE_PATH` option, which can flexibly transform the input file path into the output file path.
+- Deprecated `OUT_SUFFIX` option in favor of `OUTPUT_FILE_PATH`.
+- Enhanced error reporting to be friendlier when a file system error occurs.
+
 ## 1.4.0 (2024-03-30)
 
 - Checks the permission of the output file/directory before actually calling the API (#17).
