@@ -26,7 +26,12 @@ const options = [
   { names: ['interval', 'i'], type: 'number', help: 'API call interval.' },
   { names: ['quiet', 'q'], type: 'bool', help: 'Suppress status messages.' },
   { names: ['out', 'o'], type: 'string', help: 'Output file.' },
-  { names: ['out-suffix'], type: 'string', help: 'Output file suffix.' },
+  {
+    names: ['out-suffix'],
+    type: 'string',
+    help: 'Output file suffix.',
+    hidden: true
+  },
   { names: ['help', 'h'], type: 'bool', help: 'Print this help.' }
 ];
 
