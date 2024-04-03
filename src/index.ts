@@ -93,7 +93,7 @@ const main = async () => {
   });
 
   const startTime = Date.now();
-  const translatedText = await translateMultiple(
+  const result = await translateMultiple(
     callApi,
     fragments,
     config,
@@ -102,7 +102,9 @@ const main = async () => {
       printStatus();
     }
   );
+  if (result.status === 'error') throw new Error(result.message);
 
+  const translatedText = result.translation;
   const finalResult = restoreCodeBlocks(translatedText, codeBlocks) + '\n';
   const elapsedTime = Date.now() - startTime;
   const formatTime = (msec: number) =>

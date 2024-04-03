@@ -2,7 +2,7 @@ import { HttpsProxyAgent } from 'https-proxy-agent';
 import fetch from 'node-fetch';
 import * as rl from 'node:readline';
 import { Config } from './loadConfig.js';
-import { Status } from './status.js';
+import { SettledStatus, Status } from './status.js';
 
 export type ErrorResponse = {
   error: {
@@ -28,7 +28,7 @@ export type ApiCaller = (
   config: Config,
   onStatus: (status: Status) => void,
   maxRetry?: number
-) => Promise<Status>;
+) => Promise<SettledStatus>;
 
 /**
  * Takes an async function and returns a new function
@@ -81,7 +81,7 @@ const configureApiCaller = (options: ConfigureApiOptions) => {
     config,
     onStatus,
     maxRetry = 5
-  ): Promise<Status> => {
+  ): Promise<SettledStatus> => {
     const { prompt, model, temperature } = config;
     const agent = httpsProxy ? new HttpsProxyAgent(httpsProxy) : undefined;
     const ac = new AbortController();

@@ -1,14 +1,19 @@
 import { ApiCaller } from './api.js';
 import { Config } from './loadConfig.js';
 import { splitStringAtBlankLines } from './md-utils.js';
-import { Status, statusToText } from './status.js';
+import {
+  Status,
+  SettledStatus,
+  extractErrorsFromStatus,
+  DoneStatus
+} from './status.js';
 
 export const translateOne = async (
   callApi: ApiCaller,
   text: string,
   config: Config,
   onStatus: (status: Status) => void
-): Promise<string> => {
+): Promise<SettledStatus> => {
   onStatus({ status: 'waiting' });
   const res = await callApi(text, config, onStatus);
 
@@ -18,17 +23,11 @@ export const translateOne = async (
   ) {
     // Looks like the input was too long, so split the text in half and retry
     const splitResult = splitStringAtBlankLines(text, 0);
-    console.log(
-      'Split: ',
-      splitResult?.map(s => s.length + ':' + s.slice(0, 20)).join(', ')
-    );
-    console.log('\n\n');
-    if (splitResult === null) return text; // perhaps code blocks only
+    if (splitResult === null) return { status: 'done', translation: text }; // perhaps code blocks only
     return await translateMultiple(callApi, splitResult, config, onStatus);
   }
 
-  if (res.status === 'error') throw new Error(res.message);
-  return (res as { translation: string }).translation;
+  return res;
 };
 
 export const translateMultiple = async (
@@ -36,26 +35,34 @@ export const translateMultiple = async (
   fragments: string[],
   config: Config,
   onStatus: (status: Status) => void
-) => {
-  const statuses: Status[] = new Array(fragments.length).fill(0).map(() => ({
+): Promise<SettledStatus> => {
+  let members: Status[] = new Array(fragments.length).fill(0).map(() => ({
     status: 'waiting'
   }));
-  onStatus({ status: 'pending', lastToken: '' });
-  const handleNewStatus = (index: number) => {
-    return (status: Status) => {
-      statuses[index] = status;
-      onStatus({
-        status: 'pending',
-        lastToken: `[${statuses.map(statusToText).join(', ')}]`
-      });
-    };
-  };
-  const results = await Promise.all(
-    fragments.map((fragment, index) =>
-      translateOne(callApi, fragment, config, handleNewStatus(index))
-    )
+  onStatus({ status: 'split', members });
+  await Promise.all(
+    fragments.map((fragment, index) => {
+      const onSubStatus = (status: Status) => {
+        members = members.map((s, i) => (i === index ? status : s));
+        onStatus({ status: 'split', members });
+      };
+      return translateOne(callApi, fragment, config, onSubStatus);
+    })
   );
-  const finalResult = results.join('\n\n');
-  onStatus({ status: 'done', translation: finalResult });
-  return finalResult;
+  const okay = members.every(m => m.status === 'done');
+  if (okay) {
+    const translation = members
+      .map(m => (m as DoneStatus).translation)
+      .join('\n\n');
+    const lastStatus: Status = { status: 'done', translation };
+    onStatus(lastStatus);
+    return lastStatus;
+  } else {
+    const lastStatus: Status = {
+      status: 'error',
+      message: members.flatMap(extractErrorsFromStatus).join('\n')
+    };
+    onStatus(lastStatus);
+    return lastStatus;
+  }
 };
