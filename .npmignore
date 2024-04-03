@@ -1,4 +1,5 @@
 .env
+.github
 prompt.md
 src
 *.tgz
