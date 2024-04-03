@@ -1,8 +1,10 @@
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import fetch from 'node-fetch';
-import * as rl from 'node:readline';
+import fetch, { Response } from 'node-fetch';
+import combineAbortSignals from './combineAbortSignals.js';
 import { Config } from './loadConfig.js';
-import { SettledStatus, Status } from './status.js';
+import { ErrorStatus, SettledStatus, Status } from './status.js';
+import readlineFromStream from './readlineFromStream.js';
+import { Readable } from 'node:stream';
 
 export type ErrorResponse = {
   error: {
@@ -27,6 +29,7 @@ export type ApiCaller = (
   text: string,
   config: Config,
   onStatus: (status: Status) => void,
+  signal?: AbortSignal,
   maxRetry?: number
 ) => Promise<SettledStatus>;
 
@@ -80,72 +83,94 @@ const configureApiCaller = (options: ConfigureApiOptions) => {
     text,
     config,
     onStatus,
-    maxRetry = 5
+    signal,
+    maxRetry = 2
   ): Promise<SettledStatus> => {
     const { prompt, model, temperature } = config;
     const agent = httpsProxy ? new HttpsProxyAgent(httpsProxy) : undefined;
-    const ac = new AbortController();
+    const abortController = new AbortController();
+    const combinedSignal = signal
+      ? combineAbortSignals(abortController.signal, signal)
+      : abortController.signal;
+
+    let abortedByCaller = false;
 
     onStatus({ status: 'pending', lastToken: '' });
-    const response = await fetch(apiEndpoint, {
-      agent,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`
+    const messages = [
+      {
+        role: 'system',
+        content: 'You are a translator for Markdown documents.'
       },
-      signal: ac.signal,
-      body: JSON.stringify({
-        model,
-        temperature,
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a translator for Markdown documents.'
-          },
-          { role: 'user', content: prompt },
-          {
-            role: 'assistant',
-            content:
-              'Okay, input the Markdown.\n' +
-              'I will only return the translated text.'
-          },
-          { role: 'user', content: text }
-        ],
-        stream: true
-      })
-    });
+      { role: 'user', content: prompt },
+      {
+        role: 'assistant',
+        content:
+          'Okay, input the Markdown.\n' +
+          'I will only return the translated text.'
+      },
+      { role: 'user', content: text }
+    ];
+    let response: Response;
+    try {
+      response = await fetch(apiEndpoint, {
+        agent,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`
+        },
+        signal: combinedSignal,
+        body: JSON.stringify({
+          model,
+          temperature,
+          messages,
+          stream: true
+        })
+      });
+    } catch (err: any) {
+      if (err?.name === 'AbortError') {
+        abortedByCaller = true;
+        onStatus({ status: 'aborted' });
+        return { status: 'aborted' };
+      } else {
+        onStatus({ status: 'error', message: err.message });
+        return { status: 'error', message: err.message };
+      }
+    }
 
     const retry = () => {
       onStatus({ status: 'pending', lastToken: `(Retrying ${maxRetry})` });
-      return callApi(text, config, onStatus, maxRetry - 1);
+      return callApi(text, config, onStatus, signal, maxRetry - 1);
     };
 
     let intervalId: NodeJS.Timeout | undefined;
 
-    if (response.status >= 400) {
-      const res = (await response.json()) as ErrorResponse;
-      if (res.error.message.match(/You can retry/) && maxRetry > 0) {
+    if (response!.status >= 400) {
+      const res = (await response!.json()) as ErrorResponse;
+      if (
+        res.error.message.match(/You can retry/) &&
+        maxRetry > 0 &&
+        !abortedByCaller
+      ) {
         // Sometimes the API returns an error saying 'You can retry'. So we retry.
         return retry();
       }
       onStatus({ status: 'error', message: res.error.message });
       return { status: 'error', message: res.error.message };
     } else {
-      const stream = response.body!;
+      const stream = response!.body! as Readable;
       let resultText = '';
       let lastReceiveTime = new Date().getTime();
-      const reader = rl.createInterface(stream);
 
       intervalId = setInterval(() => {
         // If the data transmission is stopped for 30 seconds, we retry.
         if (lastReceiveTime + 30000 < new Date().getTime()) {
-          ac.abort('Server stopped responding');
+          abortController.abort('Server stopped responding');
         }
       }, 1000);
 
       try {
-        for await (const line of reader) {
+        for await (const line of readlineFromStream(stream)) {
           lastReceiveTime = new Date().getTime();
           if (line.trim().length === 0) continue;
           if (line.includes('[DONE]')) break;
@@ -160,9 +185,16 @@ const configureApiCaller = (options: ConfigureApiOptions) => {
           resultText += content;
         }
       } catch (err: any) {
-        if (err?.name === 'AbortError' && maxRetry > 0) return retry();
-        onStatus({ status: 'error', message: 'stream read error' });
-        return { status: 'error', message: 'stream read error' };
+        if (err?.name === 'AbortError' && maxRetry > 0 && !abortedByCaller) {
+          console.error(err.reason, '\n\n');
+          return retry();
+        }
+        const status: ErrorStatus = {
+          status: 'error',
+          message: err?.name === 'AbortError' ? 'aborted' : 'stream read error'
+        };
+        onStatus(status);
+        return status;
       } finally {
         intervalId && clearInterval(intervalId);
       }

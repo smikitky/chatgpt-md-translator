@@ -16,7 +16,7 @@ import {
   restoreCodeBlocks,
   splitStringAtBlankLines
 } from './md-utils.js';
-import { Status, statusToText } from './status.js';
+import { DoneStatus, Status, statusToText } from './status.js';
 import { translateMultiple } from './translate.js';
 
 const options = [
@@ -104,7 +104,7 @@ const main = async () => {
   );
   if (result.status === 'error') throw new Error(result.message);
 
-  const translatedText = result.translation;
+  const translatedText = (result as DoneStatus).translation;
   const finalResult = restoreCodeBlocks(translatedText, codeBlocks) + '\n';
   const elapsedTime = Date.now() - startTime;
   const formatTime = (msec: number) =>

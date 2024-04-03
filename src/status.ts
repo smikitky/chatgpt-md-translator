@@ -5,14 +5,16 @@ export type PendingStatus = { status: 'pending'; lastToken: string };
 export type SplitStatus = { status: 'split'; members: Status[] };
 export type DoneStatus = { status: 'done'; translation: string };
 export type ErrorStatus = { status: 'error'; message: string };
-export type SettledStatus = DoneStatus | ErrorStatus;
+export type AbortedStatus = { status: 'aborted' };
+export type SettledStatus = DoneStatus | ErrorStatus | AbortedStatus;
 
 export type Status =
   | WaitingStatus
   | PendingStatus
   | SplitStatus
   | DoneStatus
-  | ErrorStatus;
+  | ErrorStatus
+  | AbortedStatus;
 
 export const truncateStr = (str: string, maxWidth: number): string => {
   if (maxWidth === Infinity) return str;
@@ -35,6 +37,8 @@ export const statusToText = (status: Status): string => {
       return '✅';
     case 'error':
       return '❌';
+    case 'aborted':
+      return '⛔';
   }
 };
 
