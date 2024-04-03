@@ -5,13 +5,17 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import pc from 'picocolors';
 import configureApiCaller from './api.js';
+import {
+  checkFileWritable,
+  readTextFile,
+  resolveOutFilePath
+} from './fs-utils.js';
 import { loadConfig } from './loadConfig.js';
 import {
   replaceCodeBlocks,
   restoreCodeBlocks,
   splitStringAtBlankLines
 } from './md-utils.js';
-import { checkFileWritable, readTextFile } from './fs-utils.js';
 import { Status, statusToText } from './status.js';
 import { translateMultiple } from './translate.js';
 
@@ -39,21 +43,17 @@ const main = async () => {
     return;
   }
 
-  const config = await loadConfig(args);
+  const { config, warnings } = await loadConfig(args);
+  warnings.forEach(w => console.error(pc.bgYellow('Warn'), pc.yellow(w)));
 
   const file = args._args[0];
-  const filePath = path.resolve(config.baseDir, file);
+  const filePath = path.resolve(config.baseDir ?? process.cwd(), file);
   const markdown = await readTextFile(filePath);
 
-  let outFile = filePath;
-  if (config.out) {
-    outFile = path.resolve(config.baseDir, config.out);
-  } else if (config.outSuffix) {
-    outFile = outFile.replace(/\.[a-zA-Z0-9]+$/, '') + config.outSuffix;
-  }
-  if (!(await checkFileWritable(outFile))) {
-    throw new Error('Output file is not writable: ' + outFile);
-  }
+  const outFile = config.out
+    ? path.resolve(config.baseDir ?? process.cwd(), config.out)
+    : resolveOutFilePath(filePath, config.baseDir, config.outputFilePattern);
+  await checkFileWritable(outFile);
 
   const { output: replacedMd, codeBlocks } = replaceCodeBlocks(
     markdown,

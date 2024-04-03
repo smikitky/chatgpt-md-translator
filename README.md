@@ -87,12 +87,23 @@ Code blocks usually don't need to be translated, so code blocks that are longer 
 
 Short code blocks (up to 5 lines by default) are sent as-is to give the API a better context for translation. If you want to replace all code blocks, specify `0`. If you don't want this feature (for example, if you want to translate comments in code examples), you can specify a large value like `1000`. But code blocks will never be split into fragments, so be mindful of the token limit!
 
-### Output File Name
+### Output File Name (`OUTPUT_FILE_PATTERN`)
 
-By default, the input file will be overwritten with the translated content. If you prefer to save the new content under a different name, you can do so in two ways:
+By default, the content of the input file will be overwritten with the translated content. If you prefer to save the new content in a different directory or under a different filename, you can specify a pattern to transform the input path into the output path.
 
-- You can explicitly specify the output file name in command line, like `-o translated.md` or `--out=translated.md`.
-- Alternatively, you can specify `OUT_SUFFIX` in the config file. The original extention will be removed, and this suffix will be added. For example, if you specify `"-es.md"` and the input file name is `"index.md"`, the translated file will be saved as `"index-es.md"`.
+For example, when the input file is `/projects/abc/docs/tutorial/index.md`, you can set `OUTPUT_FILE_PATTERN="{dir}/i18n/{basename}-es.md"` to write the translated content to `/projects/abc/docs/tutorial/i18n/index-es.md`. The following placeholders are available:
+
+- `{dir}`: `/projects/abc/docs/tutorial` (absolute directory path)
+- `{main}`: `/projects/abc/docs/tutorial/index` (entire path minus the extension)
+- `{filename}`: `index.md`
+- `{basename}`: `index` (the filename without the extension)
+- `{ext}`: `md`
+- When `BASE_DIR` is defined in the config file:
+  - `{basedir}`: `/projects/abc/docs` (the `BASE_DIR` itself)
+  - `{reldir}`: `tutorial` (relative to `BASE_DIR`)
+  - `{relmain}`: `tutorial/index` (relative to `BASE_DIR`)
+
+Alternatively, you can directly specify the output file name in command line, like `-o translated.md` or `--out=translated.md`. The path will be relative to the current directory (or `BASE_DIR` if it's defined in the config file).
 
 ## CLI Options
 
@@ -104,12 +115,11 @@ Example: `markdown-gpt-translator -m 4 -f 1000 learn/thinking-in-react.md`
 - `-f NUM`, `--fragment-size=NUM`: Sets the fragment size (in string length).
 - `-t NUM`, `--temperature=NUM`: Sets the "temperature", or the randomness of the output.
 - `-i NUM`, `--interval=NUM`: Sets the API call interval.
-- `-o NAME`, `--out=NAME`: Explicitly sets the output file name. If set, the `OUT_SUFFIX` setting will be ignored.
-- `--out-suffix=NAME`: Output file suffix. See above.
+- `-o NAME`, `--out=NAME`: Explicitly sets the output file name. If set, the `OUTPUT_FILE_PATTERN` setting will be ignored.
 
 ## Limitations and Pitfalls
 
-- Use only "Chat" models. InstructGPT models such as "text-davinci-001" are not supported.
+- Use only "Chat" models. Legacy InstructGPT models such as "text-davinci-001" are not supported.
 - This tool does not perform serious Markdown parsing for fragment splitting. The algorithm may fail on an atypical source file that has no or very few blank lines. However, this also means that most Markdown dialects can be handled without any configuration. If this tool makes mistakes for certain custom markups, it can likely be addressed with tweaking your prompt file.
 - Actually, this tool does not perform any Markdown-specific processing other than code block detection, so it may also handle plain text or Wiki-style documents.
 - The combination of this tool and GPT-4 should do 80% of the translation job, but be sure to review the result at your own responsibility. It sometimes ignores your instruction or outputs invalid Markdown, most of which are easily detectable and fixable with tools like VS Code's diff editor.

@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "npm run build && node --test lib/*.test.js"
+    "test": "tsx --test src/*.test.ts"
   },
   "keywords": [
     "cli",
