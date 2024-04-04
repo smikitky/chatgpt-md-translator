@@ -85,7 +85,7 @@ export const loadConfig = async (args: {
   const outSuffix: string | null =
     conf.OUT_SUFFIX?.length > 0
       ? conf.OUT_SUFFIX
-      : (args.out_suffix as string).length > 0
+      : (args.out_suffix as string)?.length > 0
         ? (args.out_suffix as string)
         : null;
   if (outSuffix) {
