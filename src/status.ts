@@ -37,12 +37,12 @@ export const statusToText = (
     }
     case 'split': {
       const m = status.members;
-      let str = status.members.map(statusToText).join(', ');
+      let str = status.members.map(s => statusToText(s)).join(', ');
       if (stringWidth(str) + 2 > maxWidth) {
         const doneCount = m.filter(m => m.status === 'done').length;
         const remaining = m
           .filter(m => m.status !== 'done')
-          .map(statusToText)
+          .map(m => statusToText(m))
           .join(', ');
         str = truncateStr(
           (doneCount > 0 ? `✅x${doneCount}, ` : '') + remaining,
