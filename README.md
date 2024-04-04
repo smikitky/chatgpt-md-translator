@@ -100,6 +100,8 @@ By default, the content of the input file will be overwritten with the translate
 
 Alternatively, you can directly specify the output file name in command line, like `-o translated.md` or `--out=translated.md`. The path will be relative to the current directory (or `BASE_DIR` if it's defined in the config file).
 
+If you are translating many files, consider using the `OVERWRITE_POLICY` option as well to skip already translated files.
+
 ## CLI Options
 
 These can be used to override the settings in the config file.
@@ -111,6 +113,7 @@ Example: `markdown-gpt-translator -m 4 -f 1000 learn/thinking-in-react.md`
 - `-t NUM`, `--temperature=NUM`: Sets the "temperature", or the randomness of the output.
 - `-i NUM`, `--interval=NUM`: Sets the API call interval.
 - `-o NAME`, `--out=NAME`: Explicitly sets the output file name. If set, the `OUTPUT_FILE_PATTERN` setting will be ignored.
+- `-w ARG`, `--overwrite-policy=ARG`: Determines what happens when the output file already exists. One of "overwrite" (default), "skip", and "abort".
 
 ## Limitations and Pitfalls
 
