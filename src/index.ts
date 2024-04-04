@@ -41,14 +41,7 @@ const translateFile = async (
 
   console.log(pc.cyan(`Translating: ${inFile}`));
   if (inFile !== outFile) console.log(pc.cyan(`To: ${outFile}`));
-
-  console.log(
-    pc.bold('Model:'),
-    config.model,
-    pc.bold('Temperature:'),
-    String(config.temperature),
-    '\n'
-  );
+  console.log(''); // empty line
 
   const printStatus = () => {
     if (config.quiet) return;
@@ -82,7 +75,7 @@ const translateFile = async (
 
   await fs.writeFile(outFile, finalResult, 'utf-8');
   console.log(pc.green(`Translation completed in ${formatTime(elapsedTime)}.`));
-  console.log(`File saved as ${outFile}.`);
+  console.log(`File saved as ${outFile}.\n`);
 };
 
 const options = [
@@ -145,6 +138,13 @@ const main = async () => {
 
     pathMap.set(inFile, outFile);
   }
+
+  console.log(
+    pc.bold('Model:'),
+    config.model,
+    pc.bold('Temperature:'),
+    String(config.temperature)
+  );
 
   for (const [inFile, outFile] of pathMap) {
     try {
