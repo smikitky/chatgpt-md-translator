@@ -24,7 +24,10 @@ export const truncateStr = (str: string, maxWidth: number): string => {
   return truncatedStr;
 };
 
-export const statusToText = (status: Status): string => {
+export const statusToText = (
+  status: Status,
+  maxWidth = Number.POSITIVE_INFINITY
+): string => {
   switch (status.status) {
     case 'waiting':
       return '⏳';
@@ -33,7 +36,20 @@ export const statusToText = (status: Status): string => {
       return `⚡${tok}`;
     }
     case 'split': {
-      return `[${status.members.map(statusToText).join(', ')}]`;
+      const m = status.members;
+      let str = status.members.map(statusToText).join(', ');
+      if (stringWidth(str) + 2 > maxWidth) {
+        const doneCount = m.filter(m => m.status === 'done').length;
+        const remaining = m
+          .filter(m => m.status !== 'done')
+          .map(statusToText)
+          .join(', ');
+        str = truncateStr(
+          (doneCount > 0 ? `✅x${doneCount}, ` : '') + remaining,
+          maxWidth - 2
+        );
+      }
+      return `[${str}]`;
     }
     case 'done':
       return '✅';

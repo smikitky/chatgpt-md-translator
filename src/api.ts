@@ -163,7 +163,7 @@ const configureApiCaller = (options: ConfigureApiOptions) => {
       onStatus(status);
       return status;
     } finally {
-      intervalId && clearInterval(intervalId);
+      clearInterval(intervalId);
     }
     onStatus({ status: 'done', translation: resultText });
     return { status: 'done', translation: resultText };

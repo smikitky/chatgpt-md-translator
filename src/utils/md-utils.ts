@@ -55,7 +55,7 @@ export const restoreCodeBlocks = (
  */
 export const splitStringAtBlankLines = (
   input: string,
-  fragmentLength = 2048
+  fragmentLength: number
 ): string[] | null => {
   const lines = input.split('\n');
   let inCodeBlock = false;

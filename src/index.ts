@@ -83,10 +83,11 @@ const main = async () => {
     String(config.temperature),
     '\n'
   );
+
   const printStatus = () => {
-    if (args.quiet) return;
+    if (config.quiet) return;
     process.stdout.write('\x1b[1A\x1b[2K'); // clear previous line
-    console.log(statusToText(status));
+    console.log(statusToText(status, process.stdout.columns - 1));
   };
   printStatus();
 
