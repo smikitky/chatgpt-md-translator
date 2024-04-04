@@ -9,13 +9,13 @@ import {
   checkFileWritable,
   readTextFile,
   resolveOutFilePath
-} from './fs-utils.js';
+} from './utils/fs-utils.js';
 import { loadConfig } from './loadConfig.js';
 import {
   replaceCodeBlocks,
   restoreCodeBlocks,
   splitStringAtBlankLines
-} from './md-utils.js';
+} from './utils/md-utils.js';
 import { DoneStatus, Status, statusToText } from './status.js';
 import { translateMultiple } from './translate.js';
 

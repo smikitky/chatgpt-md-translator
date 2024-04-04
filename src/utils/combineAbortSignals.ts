@@ -2,7 +2,7 @@ const combineAbortSignals = (...signals: AbortSignal[]) => {
   const controller = new AbortController();
 
   const onAbort = () => {
-    for (const signal of signals) signal?.removeEventListener('abort', onAbort);
+    for (const signal of signals) signal.removeEventListener('abort', onAbort);
     controller.abort();
   };
 

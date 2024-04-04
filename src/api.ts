@@ -1,10 +1,11 @@
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import fetch, { Response } from 'node-fetch';
-import combineAbortSignals from './combineAbortSignals.js';
+import { Readable } from 'node:stream';
 import { Config } from './loadConfig.js';
 import { ErrorStatus, SettledStatus, Status } from './status.js';
-import readlineFromStream from './readlineFromStream.js';
-import { Readable } from 'node:stream';
+import combineAbortSignals from './utils/combineAbortSignals.js';
+import limitCallRate from './utils/limitCallRate.js';
+import readlineFromStream from './utils/readlineFromStream.js';
 
 export type ErrorResponse = {
   error: {
@@ -32,42 +33,6 @@ export type ApiCaller = (
   signal?: AbortSignal,
   maxRetry?: number
 ) => Promise<SettledStatus>;
-
-/**
- * Takes an async function and returns a new function
- * that can only be started once per interval.
- */
-const limitCallRate = <P extends any[], R>(
-  func: (...args: P) => Promise<R>,
-  interval: number
-): ((...args: P) => Promise<R>) => {
-  const queue: {
-    args: P;
-    resolve: (result: R) => void;
-    reject: (reason: unknown) => void;
-  }[] = [];
-  let processing = false;
-
-  if (interval <= 0) return func;
-
-  const processQueue = () => {
-    if (queue.length === 0) {
-      processing = false;
-      return;
-    }
-    processing = true;
-    const item = queue.shift()!;
-    func(...item.args).then(item.resolve, item.reject);
-    setTimeout(processQueue, interval * 1000);
-  };
-
-  return (...args: P) => {
-    return new Promise<R>((resolve, reject) => {
-      queue.push({ args, resolve, reject });
-      if (!processing) processQueue();
-    });
-  };
-};
 
 export type ConfigureApiOptions = {
   apiEndpoint: string;

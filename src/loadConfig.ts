@@ -2,7 +2,7 @@ import { parse } from 'dotenv';
 import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import { readTextFile } from './fs-utils.js';
+import { readTextFile } from './utils/fs-utils.js';
 
 const homeDir = os.homedir();
 

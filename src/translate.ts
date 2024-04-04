@@ -1,13 +1,13 @@
 import { ApiCaller } from './api.js';
-import combineAbortSignals from './combineAbortSignals.js';
 import { Config } from './loadConfig.js';
-import { splitStringAtBlankLines } from './md-utils.js';
 import {
-  Status,
+  DoneStatus,
   SettledStatus,
-  extractErrorsFromStatus,
-  DoneStatus
+  Status,
+  extractErrorsFromStatus
 } from './status.js';
+import combineAbortSignals from './utils/combineAbortSignals.js';
+import { splitStringAtBlankLines } from './utils/md-utils.js';
 
 export const translateOne = async (
   callApi: ApiCaller,

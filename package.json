@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "tsx --test src/*.test.ts"
+    "test": "tsx --test src/**/*.test.ts"
   },
   "keywords": [
     "cli",
