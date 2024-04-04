@@ -21,29 +21,40 @@ export const readTextFile = async (filePath: string): Promise<string> => {
   }
 };
 
-export const checkFileWritable = async (filePath: string): Promise<void> => {
+export const checkDirectoryWritable = async (
+  dirPath: string
+): Promise<void> => {
+  try {
+    await fs.access(dirPath, fs.constants.F_OK | fs.constants.W_OK);
+  } catch (dirError) {
+    if (!isNodeException(dirError)) throw dirError;
+    switch (dirError.code) {
+      case 'ENOENT':
+        throw new Error(`Directory does not exist: ${dirPath}`);
+      case 'EACCES':
+        throw new Error(`Directory is not writable: ${dirPath}`);
+      default:
+        throw dirError;
+    }
+  }
+};
+
+export const checkFileWritable = async (
+  filePath: string,
+  throwOnOverwrite: boolean
+): Promise<void> => {
   try {
     await fs.access(filePath, fs.constants.F_OK | fs.constants.W_OK);
     // The file exists but can be overwritten
+    if (throwOnOverwrite) throw new Error(`File already exists: ${filePath}`);
     return;
-  } catch (fileError) {
-    if (!isNodeException(fileError)) throw fileError;
-    if (fileError.code === 'ENOENT') {
+  } catch (e) {
+    if (!isNodeException(e)) throw e;
+    if (e.code === 'ENOENT') {
       // The file does not exist, check if directory is writable
       const dirPath = path.dirname(filePath);
-      try {
-        await fs.access(dirPath, fs.constants.F_OK | fs.constants.W_OK);
-        // Directory exists and is writable
-        return;
-      } catch (dirError) {
-        if (!isNodeException(dirError)) throw dirError;
-        if (dirError.code === 'ENOENT') {
-          // Directory does not exist
-          throw new Error(`Directory does not exist: ${dirPath}`);
-        }
-        // Directory exists but is not writable, or other errors
-        throw new Error(`Directory is not writable: ${dirPath}`);
-      }
+      await checkDirectoryWritable(dirPath);
+      return;
     }
     // File exists but is not writable, or other errors
     throw new Error(`File is not writable: ${filePath}`);
