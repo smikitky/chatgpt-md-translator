@@ -8,6 +8,7 @@ import configureApiCaller from './api.js';
 import { loadConfig } from './loadConfig.js';
 import { type DoneStatus, type Status, statusToText } from './status.js';
 import { translateMultiple } from './translate.js';
+import formatTime from './utils/formatTime.js';
 import {
   checkFileWritable,
   readTextFile,
@@ -111,12 +112,6 @@ const main = async () => {
   const translatedText = (result as DoneStatus).translation;
   const finalResult = `${restoreCodeBlocks(translatedText, codeBlocks)}\n`;
   const elapsedTime = Date.now() - startTime;
-  const formatTime = (msec: number) =>
-    msec < 60000
-      ? `${Math.floor(msec / 1000)} second${msec >= 2000 ? 's' : ''}`
-      : `${Math.floor(msec / 60000)}:${String(
-          Math.floor((msec % 60000) / 1000)
-        ).padStart(2, '0')}`;
 
   await fs.writeFile(outFile, finalResult, 'utf-8');
   console.log(pc.green(`Translation completed in ${formatTime(elapsedTime)}.`));
