@@ -1,6 +1,15 @@
+## 1.6.0 (2024-04-04)
+
+- You can now specify more than one file to translate multiple source files sequentially (#20).
+- Added `OVERWRITE_POLICY` (`-w`/`--overwrite-policy`) option, which allows you to specify what happens if the output file already exists (#20).
+- When one of the API calls causes a critical error, the other API calls are now aborted as well.
+- Fixed an error where the translation status was still reported in a non-TTY environment.
+- Fixed an issue that occurred when the status text was longer than the terminal width.
+These adjustments ensure consistency in tense and wording, making the document clearer and more professional.
+
 ## 1.5.1 (2024-04-03)
 
-- Fixed error handling when chekcing if the output file is writable
+- Fixed error handling when chekcing if the output file is writable.
 - Hid a deprecated and undocumented CLI option from `--help`.
 
 ## 1.5.0 (2024-04-03)
