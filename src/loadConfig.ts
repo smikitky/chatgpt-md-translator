@@ -7,6 +7,9 @@ import { readTextFile } from './utils/fs-utils.js';
 
 const homeDir = os.homedir();
 
+const overwritePolicies = ['skip', 'abort', 'overwrite'] as const;
+export type OverwritePolicy = (typeof overwritePolicies)[number];
+
 export interface Config {
   apiEndpoint: string;
   apiKey: string;
@@ -20,6 +23,7 @@ export interface Config {
   codeBlockPreservationLines: number;
   out: string | null;
   outputFilePattern: string | null;
+  overwritePolicy: OverwritePolicy;
   httpsProxy?: string;
 }
 
@@ -92,6 +96,15 @@ export const loadConfig = async (args: {
     warnings.push('OUT_SUFFIX is deprecated. Use OUTPUT_FILE_PATTERN instead.');
   }
 
+  const checkOverwritePolicy = (input: unknown): OverwritePolicy | null => {
+    if (typeof input === 'string') {
+      if (overwritePolicies.includes(input as OverwritePolicy))
+        return input as OverwritePolicy;
+      throw new Error(`Invalid overwrite policy: ${input}`);
+    }
+    return null;
+  };
+
   const config = {
     apiEndpoint:
       conf.API_ENDPOINT ?? 'https://api.openai.com/v1/chat/completions',
@@ -113,6 +126,10 @@ export const loadConfig = async (args: {
       (conf.OUTPUT_FILE_PATTERN?.length > 0
         ? conf.OUTPUT_FILE_PATTERN
         : null) ?? (outSuffix ? `{main}${outSuffix}` : null),
+    overwritePolicy:
+      checkOverwritePolicy(args.overwrite_policy) ??
+      checkOverwritePolicy(conf.OVERWRITE_POLICY) ??
+      'overwrite',
     httpsProxy: conf.HTTPS_PROXY ?? process.env.HTTPS_PROXY
   };
 

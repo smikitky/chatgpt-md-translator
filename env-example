@@ -40,5 +40,8 @@ OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxx"
 # Transforms the input path to the output file path.
 # OUTPUT_FILE_PATTERN=""
 
+# What to do when the output file already exists. One of "overwite", "skip" and "abort".
+# OVERWRITE_POLICY="overwrite"
+
 # Custom API address, to integrate with a third-party API service provider.
 # API_ENDPOINT="https://api.openai.com/v1/chat/completions"
