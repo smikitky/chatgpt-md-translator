@@ -31,7 +31,8 @@
     "dotenv": "^16.0.3",
     "https-proxy-agent": "^6.2.0",
     "node-fetch": "^3.3.2",
-    "picocolors": "^1.0.0"
+    "picocolors": "^1.0.0",
+    "string-width": "^7.1.0"
   },
   "devDependencies": {
     "@biomejs/biome": "1.6.4",
