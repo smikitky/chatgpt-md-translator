@@ -1,9 +1,9 @@
-import { ApiCaller } from './api.js';
-import { Config } from './loadConfig.js';
+import type { ApiCaller } from './api.js';
+import type { Config } from './loadConfig.js';
 import {
-  DoneStatus,
-  SettledStatus,
-  Status,
+  type DoneStatus,
+  type SettledStatus,
+  type Status,
   extractErrorsFromStatus
 } from './status.js';
 import combineAbortSignals from './utils/combineAbortSignals.js';
@@ -74,14 +74,7 @@ export const translateMultiple = async (
     })
   );
   const okay = members.every(m => m.status === 'done');
-  if (okay) {
-    const translation = members
-      .map(m => (m as DoneStatus).translation)
-      .join('\n\n');
-    const lastStatus: Status = { status: 'done', translation };
-    onStatus(lastStatus);
-    return lastStatus;
-  } else {
+  if (!okay) {
     const lastStatus: Status = {
       status: 'error',
       message: members.flatMap(extractErrorsFromStatus).join('\n')
@@ -89,4 +82,11 @@ export const translateMultiple = async (
     onStatus(lastStatus);
     return lastStatus;
   }
+
+  const translation = members
+    .map(m => (m as DoneStatus).translation)
+    .join('\n\n');
+  const lastStatus: Status = { status: 'done', translation };
+  onStatus(lastStatus);
+  return lastStatus;
 };

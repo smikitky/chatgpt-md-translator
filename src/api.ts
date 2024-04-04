@@ -1,9 +1,10 @@
+import type { Readable } from 'node:stream';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import fetch, { Response } from 'node-fetch';
-import { Readable } from 'node:stream';
-import { Config } from './loadConfig.js';
-import { ErrorStatus, SettledStatus, Status } from './status.js';
+import fetch, { AbortError, type Response } from 'node-fetch';
+import type { Config } from './loadConfig.js';
+import type { ErrorStatus, SettledStatus, Status } from './status.js';
 import combineAbortSignals from './utils/combineAbortSignals.js';
+import { isMessageError } from './utils/error-utils.js';
 import limitCallRate from './utils/limitCallRate.js';
 import readlineFromStream from './utils/readlineFromStream.js';
 
@@ -92,15 +93,18 @@ const configureApiCaller = (options: ConfigureApiOptions) => {
           stream: true
         })
       });
-    } catch (err: any) {
-      if (err?.name === 'AbortError') {
+    } catch (err: unknown) {
+      if (err instanceof AbortError) {
         abortedByCaller = true;
         onStatus({ status: 'aborted' });
         return { status: 'aborted' };
-      } else {
-        onStatus({ status: 'error', message: err.message });
-        return { status: 'error', message: err.message };
       }
+      const status: ErrorStatus = {
+        status: 'error',
+        message: isMessageError(err) ? err.message : 'network error'
+      };
+      onStatus(status);
+      return status;
     }
 
     const retry = () => {
@@ -108,10 +112,10 @@ const configureApiCaller = (options: ConfigureApiOptions) => {
       return callApi(text, config, onStatus, signal, maxRetry - 1);
     };
 
-    let intervalId: NodeJS.Timeout | undefined;
+    if (!response) throw new Error();
 
-    if (response!.status >= 400) {
-      const res = (await response!.json()) as ErrorResponse;
+    if (response.status >= 400) {
+      const res = (await response.json()) as ErrorResponse;
       if (
         res.error.message.match(/You can retry/) &&
         maxRetry > 0 &&
@@ -122,50 +126,47 @@ const configureApiCaller = (options: ConfigureApiOptions) => {
       }
       onStatus({ status: 'error', message: res.error.message });
       return { status: 'error', message: res.error.message };
-    } else {
-      const stream = response!.body! as Readable;
-      let resultText = '';
-      let lastReceiveTime = new Date().getTime();
-
-      intervalId = setInterval(() => {
-        // If the data transmission is stopped for 30 seconds, we retry.
-        if (lastReceiveTime + 30000 < new Date().getTime()) {
-          abortController.abort('Server stopped responding');
-        }
-      }, 1000);
-
-      try {
-        for await (const line of readlineFromStream(stream)) {
-          lastReceiveTime = new Date().getTime();
-          if (line.trim().length === 0) continue;
-          if (line.includes('[DONE]')) break;
-          const res = JSON.parse(line.split(': ', 2)[1]) as ApiStreamResponse;
-          if (res.choices[0]?.finish_reason === 'length') {
-            onStatus({ status: 'error', message: 'reduce the length.' });
-            return { status: 'error', message: 'reduce the length.' };
-          }
-          const content = res.choices[0].delta.content ?? '';
-          if (content.length)
-            onStatus({ status: 'pending', lastToken: content });
-          resultText += content;
-        }
-      } catch (err: any) {
-        if (err?.name === 'AbortError' && maxRetry > 0 && !abortedByCaller) {
-          console.error(err.reason, '\n\n');
-          return retry();
-        }
-        const status: ErrorStatus = {
-          status: 'error',
-          message: err?.name === 'AbortError' ? 'aborted' : 'stream read error'
-        };
-        onStatus(status);
-        return status;
-      } finally {
-        intervalId && clearInterval(intervalId);
-      }
-      onStatus({ status: 'done', translation: resultText });
-      return { status: 'done', translation: resultText };
     }
+    const stream = response.body as Readable;
+    let resultText = '';
+    let lastReceiveTime = new Date().getTime();
+
+    const intervalId = setInterval(() => {
+      // If the data transmission is stopped for 30 seconds, we retry.
+      if (lastReceiveTime + 30000 < new Date().getTime()) {
+        abortController.abort('Server stopped responding');
+      }
+    }, 1000);
+
+    try {
+      for await (const line of readlineFromStream(stream)) {
+        lastReceiveTime = new Date().getTime();
+        if (line.trim().length === 0) continue;
+        if (line.includes('[DONE]')) break;
+        const res = JSON.parse(line.split(': ', 2)[1]) as ApiStreamResponse;
+        if (res.choices[0]?.finish_reason === 'length') {
+          onStatus({ status: 'error', message: 'reduce the length.' });
+          return { status: 'error', message: 'reduce the length.' };
+        }
+        const content = res.choices[0].delta.content ?? '';
+        if (content.length) onStatus({ status: 'pending', lastToken: content });
+        resultText += content;
+      }
+    } catch (err: unknown) {
+      if (err instanceof AbortError && maxRetry > 0 && !abortedByCaller) {
+        return retry();
+      }
+      const status: ErrorStatus = {
+        status: 'error',
+        message: err instanceof AbortError ? 'aborted' : 'stream read error'
+      };
+      onStatus(status);
+      return status;
+    } finally {
+      intervalId && clearInterval(intervalId);
+    }
+    onStatus({ status: 'done', translation: resultText });
+    return { status: 'done', translation: resultText };
   };
   return limitCallRate(callApi, rateLimit);
 };

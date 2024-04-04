@@ -1,23 +1,23 @@
 #!/usr/bin/env node
 
-import dashdash from 'dashdash';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
+import dashdash from 'dashdash';
 import pc from 'picocolors';
 import configureApiCaller from './api.js';
+import { loadConfig } from './loadConfig.js';
+import { type DoneStatus, type Status, statusToText } from './status.js';
+import { translateMultiple } from './translate.js';
 import {
   checkFileWritable,
   readTextFile,
   resolveOutFilePath
 } from './utils/fs-utils.js';
-import { loadConfig } from './loadConfig.js';
 import {
   replaceCodeBlocks,
   restoreCodeBlocks,
   splitStringAtBlankLines
 } from './utils/md-utils.js';
-import { DoneStatus, Status, statusToText } from './status.js';
-import { translateMultiple } from './translate.js';
 
 const options = [
   { names: ['model', 'm'], type: 'string', help: 'Model to use.' },
@@ -49,7 +49,8 @@ const main = async () => {
   }
 
   const { config, warnings } = await loadConfig(args);
-  warnings.forEach(w => console.error(pc.bgYellow('Warn'), pc.yellow(w)));
+  for (const warning of warnings)
+    console.error(pc.bgYellow('Warn'), pc.yellow(warning));
 
   const file = args._args[0];
   const filePath = path.resolve(config.baseDir ?? process.cwd(), file);
@@ -64,7 +65,10 @@ const main = async () => {
     markdown,
     config.codeBlockPreservationLines
   );
-  const fragments = splitStringAtBlankLines(replacedMd, config.fragmentSize)!;
+  const fragments = splitStringAtBlankLines(
+    replacedMd,
+    config.fragmentSize
+  ) ?? [replacedMd];
 
   let status: Status = { status: 'pending', lastToken: '' };
 
@@ -73,7 +77,7 @@ const main = async () => {
 
   console.log(
     pc.bold('Model:'),
-    config.model + ',',
+    config.model,
     pc.bold('Temperature:'),
     String(config.temperature),
     '\n'
@@ -105,7 +109,7 @@ const main = async () => {
   if (result.status === 'error') throw new Error(result.message);
 
   const translatedText = (result as DoneStatus).translation;
-  const finalResult = restoreCodeBlocks(translatedText, codeBlocks) + '\n';
+  const finalResult = `${restoreCodeBlocks(translatedText, codeBlocks)}\n`;
   const elapsedTime = Date.now() - startTime;
   const formatTime = (msec: number) =>
     msec < 60000

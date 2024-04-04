@@ -1,0 +1,27 @@
+{
+  "formatter": {
+    "formatWithErrors": true
+  },
+  "json": {
+    "formatter": {
+      "indentStyle": "space",
+      "indentWidth": 2
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "enabled": true,
+      "indentStyle": "space",
+      "indentWidth": 2,
+      "quoteStyle": "single",
+      "arrowParentheses": "asNeeded",
+      "trailingComma": "none"
+    }
+  },
+  "organizeImports": {
+    "enabled": true,
+    "include": [
+      "src/**/*.ts"
+    ]
+  }
+}
