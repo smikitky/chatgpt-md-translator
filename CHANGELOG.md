@@ -5,7 +5,6 @@
 - When one of the API calls causes a critical error, the other API calls are now aborted as well.
 - Fixed an error where the translation status was still reported in a non-TTY environment.
 - Fixed an issue that occurred when the status text was longer than the terminal width.
-These adjustments ensure consistency in tense and wording, making the document clearer and more professional.
 
 ## 1.5.1 (2024-04-03)
 
