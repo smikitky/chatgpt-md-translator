@@ -24,7 +24,8 @@ export const replaceCodeBlocks = (
       const id = crypto.randomBytes(8).toString('hex');
       codeBlocks[id] = content;
       return `${lines[0]}\n${indent}(((((${id})))))\n${indent}\`\`\``;
-    } else return match;
+    }
+    return match;
   });
   return { output, codeBlocks };
 };
@@ -54,14 +55,14 @@ export const restoreCodeBlocks = (
  */
 export const splitStringAtBlankLines = (
   input: string,
-  fragmentLength: number = 2048
+  fragmentLength = 2048
 ): string[] | null => {
   const lines = input.split('\n');
   let inCodeBlock = false;
   let currentFragment: string[] = [];
-  let fragments: string[] = [];
-  let nearstToHalfDiff: number = Infinity;
-  let nearstToHalfIndex: number = -1;
+  const fragments: string[] = [];
+  let nearstToHalfDiff: number = Number.POSITIVE_INFINITY;
+  let nearstToHalfIndex = -1;
 
   for (let i = 0; i < lines.length; i++) {
     if (lines[i].startsWith('```')) inCodeBlock = !inCodeBlock;
@@ -90,8 +91,8 @@ export const splitStringAtBlankLines = (
     fragments.push(lines.slice(0, nearstToHalfIndex).join('\n'));
     fragments.push(lines.slice(nearstToHalfIndex).join('\n'));
     return fragments;
-  } else {
-    fragments.push(currentFragment.join('\n'));
-    return fragments;
   }
+
+  fragments.push(currentFragment.join('\n'));
+  return fragments;
 };

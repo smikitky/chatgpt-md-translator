@@ -2,7 +2,7 @@
  * Takes an async function and returns a new function
  * that can only be started once per interval.
  */
-const limitCallRate = <P extends any[], R>(
+const limitCallRate = <P extends unknown[], R>(
   func: (...args: P) => Promise<R>,
   interval: number
 ): ((...args: P) => Promise<R>) => {
@@ -21,6 +21,7 @@ const limitCallRate = <P extends any[], R>(
       return;
     }
     processing = true;
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
     const item = queue.shift()!;
     func(...item.args).then(item.resolve, item.reject);
     setTimeout(processQueue, interval * 1000);

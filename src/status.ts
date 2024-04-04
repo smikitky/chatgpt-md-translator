@@ -17,9 +17,11 @@ export type Status =
   | AbortedStatus;
 
 export const truncateStr = (str: string, maxWidth: number): string => {
-  if (maxWidth === Infinity) return str;
-  while (stringWidth(str) > maxWidth) str = str.slice(0, -1);
-  return str;
+  if (maxWidth === Number.POSITIVE_INFINITY) return str;
+  let truncatedStr = str;
+  while (stringWidth(truncatedStr) > maxWidth)
+    truncatedStr = truncatedStr.slice(0, -1);
+  return truncatedStr;
 };
 
 export const statusToText = (status: Status): string => {
@@ -31,7 +33,7 @@ export const statusToText = (status: Status): string => {
       return `⚡${tok}`;
     }
     case 'split': {
-      return '[' + status.members.map(statusToText).join(', ') + ']';
+      return `[${status.members.map(statusToText).join(', ')}]`;
     }
     case 'done':
       return '✅';

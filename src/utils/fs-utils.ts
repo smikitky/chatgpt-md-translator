@@ -1,18 +1,20 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
+import { isNodeException } from './error-utils';
 
 // We use this to output a bit frindlier error
 export const readTextFile = async (filePath: string): Promise<string> => {
   try {
     return await fs.readFile(filePath, 'utf-8');
-  } catch (e: any) {
+  } catch (e) {
+    if (!isNodeException(e)) throw e;
     switch (e.code) {
       case 'EISDIR':
-        throw new Error('The specified path is a directory: ' + filePath);
+        throw new Error(`The specified path is a directory: ${filePath}`);
       case 'ENOENT':
-        throw new Error('File not found: ' + filePath);
+        throw new Error(`File not found: ${filePath}`);
       case 'EACCES':
-        throw new Error('Permission denied: ' + filePath);
+        throw new Error(`Permission denied: ${filePath}`);
       default:
         throw e;
     }
@@ -24,25 +26,27 @@ export const checkFileWritable = async (filePath: string): Promise<void> => {
     await fs.access(filePath, fs.constants.F_OK | fs.constants.W_OK);
     // The file exists but can be overwritten
     return;
-  } catch (error: any) {
-    if (error.code === 'ENOENT') {
+  } catch (fileError) {
+    if (!isNodeException(fileError)) throw fileError;
+    if (fileError.code === 'ENOENT') {
       // The file does not exist, check if directory is writable
       const dirPath = path.dirname(filePath);
       try {
         await fs.access(dirPath, fs.constants.F_OK | fs.constants.W_OK);
         // Directory exists and is writable
         return;
-      } catch (dirError: any) {
+      } catch (dirError) {
+        if (!isNodeException(dirError)) throw dirError;
         if (dirError.code === 'ENOENT') {
           // Directory does not exist
-          throw new Error('Directory does not exist: ' + dirPath);
+          throw new Error(`Directory does not exist: ${dirPath}`);
         }
         // Directory exists but is not writable, or other errors
-        throw new Error('Directory is not writable: ' + dirPath);
+        throw new Error(`Directory is not writable: ${dirPath}`);
       }
     }
     // File exists but is not writable, or other errors
-    throw new Error('File is not writable: ' + filePath);
+    throw new Error(`File is not writable: ${filePath}`);
   }
 };
 
