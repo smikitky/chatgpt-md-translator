@@ -6,3 +6,5 @@ src
 tsconfig.json
 lib/*.test.js
 docs
+.vscode
+biome.json
