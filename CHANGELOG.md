@@ -1,3 +1,7 @@
+## 1.7.0 (2024-04-10)
+
+- GPT-4 Turbo has entered general availability, so the model shorthand `4` now points to `gpt-4-turbo` instead of `gpt-4`. `gpt-4-turbo` is faster, smarter, and more cost-effective; there is almost no practical reason to choose `gpt-4` now.
+
 ## 1.6.0 (2024-04-04)
 
 - You can now specify more than one file to translate multiple source files sequentially (#20).

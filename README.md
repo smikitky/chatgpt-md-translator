@@ -42,15 +42,17 @@ In addition to `OPENAI_API_TOKEN`, you can set several values in the config file
 
 ### Model (`MODEL_NAME`)
 
-Set this to one of the models accepted by the OpenAI API. Usually it's one of these:
+This is the setting that has the greatest impact on translation accuracy (and price!). Set this to one of the [Chat models](https://platform.openai.com/docs/models/) accepted by the OpenAI API.
 
-- `gpt-4` (`4`)
-- `gpt-4-32k` (`4large`)
-- `gpt-4-1106-preview`: See the notes below
-- `gpt-3.5-turbo` (`3`)
-- `gpt-3.5-turbo-16k` (`3large`)
+- Recommended:
+  - `gpt-4-turbo` (`4`)
+  - `gpt-3.5-turbo` (`3`)
+- Legacy / No longer recommended:
+  - `gpt-4`
+  - `gpt-4-32k` (`4large`)
+  - `gpt-3.5-turbo-16k` (`3large`)
 
-Shortcuts (in brackets) are available. This is the setting that has the greatest impact on translation accuracy (and price!). If you try to access a model to which you don't have access yet, you will get an error saying that model 'XYZ' does not exist.
+Shortcuts (in brackets) are available. Starting from v1.7.0, the shortcut `4` points to `gpt-4-turbo` rather than `gpt-4`.
 
 Although GPT-4 is much smarter, it is slower and much more expensive than GPT-3. Try using the GPT-3 model first, especially while you are experimenting with this tool. It's recommended to set the usage limit to a reasonable amount (e.g., $10) on the OpenAI's account management page.
 
@@ -68,7 +70,7 @@ Setting a value that is too large can result in longer processing time, and in w
 On the other hand, splitting the text into too small fragments can result in a loss of term consistency or accuracy in the translation, since there is less context available for each translation process.
 
 > [!TIP]
-> The `gpt-4-1106-preview` model, released in November 2023, supports a massive context window, effectively allowing for unlimited prompt file size. However, since the _output_ token size is still limited to 4,096, the size of the input text is limited accordingly. Splitting a long article remains a useful approach.
+> GPT-4 Turbo models support a massive context window, effectively allowing for unlimited prompt file size. However, since the _output_ token size is still limited to 4,096, the size of the input text is limited accordingly. Splitting a long article remains a useful approach.
 
 ### Temperature (`TEMPERATURE`)
 

@@ -58,10 +58,10 @@ export const findPromptFile = () =>
 
 const resolveModelShorthand = (model: string): string => {
   const shorthands: { [key: string]: string } = {
-    '4': 'gpt-4',
-    '4large': 'gpt-4-32k',
+    '4': 'gpt-4-turbo',
+    '4large': 'gpt-4-32k', // legacy
     '3': 'gpt-3.5-turbo',
-    '3large': 'gpt-3.5-turbo-16k'
+    '3large': 'gpt-3.5-turbo-16k' // legacy
   };
   return shorthands[model] ?? model;
 };
