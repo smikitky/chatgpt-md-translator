@@ -1,6 +1,6 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { isNodeException } from './error-utils';
+import { isNodeException } from './error-utils.js';
 
 // We use this to output a bit frindlier error
 export const readTextFile = async (filePath: string): Promise<string> => {
