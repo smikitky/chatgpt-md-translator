@@ -40,7 +40,7 @@ OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxx"
 # Transforms the input path to the output file path.
 # OUTPUT_FILE_PATTERN=""
 
-# What to do when the output file already exists. One of "overwite", "skip" and "abort".
+# What to do when the output file already exists. One of "overwrite", "skip" and "abort".
 # OVERWRITE_POLICY="overwrite"
 
 # Custom API address, to integrate with a third-party API service provider.

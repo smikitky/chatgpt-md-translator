@@ -12,7 +12,7 @@
 
 ## 1.5.1 (2024-04-03)
 
-- Fixed error handling when chekcing if the output file is writable.
+- Fixed error handling when checking if the output file is writable.
 - Hid a deprecated and undocumented CLI option from `--help`.
 
 ## 1.5.0 (2024-04-03)
@@ -24,7 +24,7 @@
 ## 1.4.0 (2024-03-30)
 
 - Checks the permission of the output file/directory before actually calling the API (#17).
-- Fixed: `out` CLI option is now relative to BASE_DIR rather than the target file, following starndard convention of other CLI tools (#16).
+- Fixed: `out` CLI option is now relative to BASE_DIR rather than the target file, following standard convention of other CLI tools (#16).
 
 ## 1.3.2 (2024-03-14)
 
