@@ -104,8 +104,7 @@ const main = async () => {
   const args = parser.parse();
 
   if (args.help || args._args.length < 1) {
-    if (args._args.length < 1)
-      console.log(pc.red('No input files are specified.'));
+    if (!args.help) console.log(pc.red('No input files are specified.'));
     console.log(
       pc.yellow('Usage: chatgpt-md-translator [options] <file> [<file>...]')
     );
