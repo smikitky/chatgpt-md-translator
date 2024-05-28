@@ -45,6 +45,7 @@ In addition to `OPENAI_API_TOKEN`, you can set several values in the config file
 This is the setting that has the greatest impact on translation accuracy (and price!). Set this to one of the [Chat models](https://platform.openai.com/docs/models/) accepted by the OpenAI API.
 
 - Recommended:
+  - `gpt-4o`
   - `gpt-4-turbo` (`4`)
   - `gpt-3.5-turbo` (`3`)
 - Legacy / No longer recommended:
@@ -52,7 +53,7 @@ This is the setting that has the greatest impact on translation accuracy (and pr
   - `gpt-4-32k` (`4large`)
   - `gpt-3.5-turbo-16k` (`3large`)
 
-Shortcuts (in brackets) are available. Starting from v1.7.0, the shortcut `4` points to `gpt-4-turbo` rather than `gpt-4`.
+Shortcuts (in brackets) are available. Starting from v1.7.0, the shortcut `4` points to `gpt-4-turbo` rather than `gpt-4`. In the next version, it is likely that `4` will refer to `gpt-4o`.
 
 Although GPT-4 is much smarter, it is slower and much more expensive than GPT-3. Try using the GPT-3 model first, especially while you are experimenting with this tool. It's recommended to set the usage limit to a reasonable amount (e.g., $10) on the OpenAI's account management page.
 
