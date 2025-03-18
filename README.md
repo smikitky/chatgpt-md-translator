@@ -42,29 +42,37 @@ In addition to `OPENAI_API_TOKEN`, you can set several values in the config file
 
 ### Model (`MODEL_NAME`)
 
-This is the setting that has the greatest impact on translation quality and price. Visit [the Models section](https://platform.openai.com/docs/models/), and specify one of the models that support the Chat Completion endpoint, such as `gpt-4o` or `o3-mini`. For backward compatibility, the default model is still `gpt-3.5-turbo`. Currently, `gpt-4o` is almost certainly the better option.
+This is the setting that has the greatest impact on translation quality and price. Visit [the Models section](https://platform.openai.com/docs/models/) and specify one of the models that support the Chat Completion endpoint, such as `gpt-4o` or `o3-mini`. For backward compatibility, the default model is still `gpt-3.5-turbo`, but `gpt-4o` is almost certainly the better option now.
 
-Shorthand model names such as `4` (→`gpt-4-turbo`) have been deprecated. Use proper model names available in the OpenAI API.
+Shorthand model names such as `4` (→`gpt-4-turbo`) have been deprecated. Use full model names available in the OpenAI API.
+
+> [!NOTE] 
+> When choosing a reasoning model such as `o3-mini`, be aware of the following:
+>
+> - Specify the temperature as `default` when you see an error "'temperature' is not supported with this model".
+> - Reasoning models are not necessarily better when it comes to natural language processing. Ordinary chat models such as `gpt-4o` may be sufficient.
+> - It thinks hard before starting to send the translation, so wait patiently.
 
 ### Fragment Size (`FRAGMENT_TOKEN_SIZE`)
 
-Since ChatGPT cannot handle long texts, this program works by splitting a given Markdown file into multiple parts (fragments), passing them to the API along with the prompt in parallel, and combining the translated results. This option determines the (soft) maximum length of each fragment. The default is 2048 (in string `.length`). The optimal value depends on several factors:
+With this option, this tool can split a given Markdown file into multiple parts (fragments), pass them to the API along with the prompt in parallel, and combine the translated results. This option determines the (soft) maximum length of each fragment. The default is 2048 (in string `.length`), but this may be too conservative today.
 
-- **Model**: Each model has a defined upper limit on the number of _tokens_. Read [OpenAI's explanation about tokens](https://platform.openai.com/docs/introduction/tokens).
+When you're using a recent model such as GPT-4o that supports a large number of output tokens, this can typically be set to a very large number (e.g., 50000) so that you can translate the entire article at once. However, when the result exceeds the max output tokens, the transfer of the translated text may stop midway. If this happens, the program will automatically split the fragment in half and try again recursively. Try to avoid this as it can waste your time and money.
+
+The optimal value depends on several factors:
+
+- **Model**: Each model has a defined upper limit on the number of _tokens_. Read [OpenAI's explanation about tokens](https://platform.openai.com/tokenizer).
 - **Target language**: Some languages are tokenized less effectively than others, which can limit the size of each fragment.
-- **Prompt file size**: The prompt will be sent as input along with the Markdown file to translate. The longer the instruction is, the shorter each fragment has to be.
+- **Prompt file size**: The prompt will be sent as input along with the Markdown file to translate. The longer the instruction is, the shorter each fragment may have to be.
 - **Desired processing time**: Splitting into smaller sizes allows for parallel processing and faster completion.
-
-Setting a value that is too large can result in longer processing time, and in worse cases, the transfer of the translated text may stop midway. If this happens, the program will automatically split the fragment in half and try again recursively. Try to avoid this as it can waste your time and money.
-
-On the other hand, splitting the text into too small fragments can result in a loss of term consistency or accuracy in the translation, since there is less context available for each translation process.
-
-> [!TIP]
-> GPT-4 Turbo models support a massive context window, effectively allowing for unlimited prompt file size. However, since the _output_ token size is still limited to 4,096, the size of the input text is limited accordingly. Splitting a long article remains a useful approach.
+- **Output consistency**: Splitting the text into too small fragments can result in a loss of term consistency or accuracy in the translation, since there is less context available for each translation process.
 
 ### Temperature (`TEMPERATURE`)
 
 This controls the randomness of the output. See the [official API docs](https://platform.openai.com/docs/api-reference/chat/create#chat-create-temperature). The default is `0.1`, which is intentionally much lower than the original ChatGPT API default (`1.0`). Since this tool works by splitting a file, too much randomness can lead to inconsistent translations. Experience suggests that a high value also increases the risk of breaking markups or ignoring your instructions.
+
+> [!NOTE] 
+> Some models throw an error when a temperature is specified in the API. If this happens, set as `TEMPERATURE=default`.
 
 ### API Call Interval (`API_CALL_INTERVAL`)
 
@@ -102,14 +110,14 @@ Example: `markdown-gpt-translator -m 4 -f 1000 learn/thinking-in-react.md`
 
 - `-m MODEL`, `--model=MODEL`: Sets the language model.
 - `-f NUM`, `--fragment-size=NUM`: Sets the fragment size (in string length).
-- `-t NUM`, `--temperature=NUM`: Sets the "temperature", or the randomness of the output.
+- `-t NUM`, `--temperature=NUM`: Sets the "temperature", or the randomness of the output. You can also specify `-t default`.
 - `-i NUM`, `--interval=NUM`: Sets the API call interval.
 - `-o NAME`, `--out=NAME`: Explicitly sets the output file name. If set, the `OUTPUT_FILE_PATTERN` setting will be ignored.
 - `-w ARG`, `--overwrite-policy=ARG`: Determines what happens when the output file already exists. One of "overwrite" (default), "skip", and "abort".
 
 ## Limitations and Pitfalls
 
-- Use only "Chat" models. Legacy InstructGPT models such as "text-davinci-001" are not supported.
-- This tool does not perform serious Markdown parsing for fragment splitting. The algorithm may fail on an atypical source file that has no or very few blank lines. However, this also means that most Markdown dialects can be handled without any configuration. If this tool makes mistakes for certain custom markups, it can likely be addressed with tweaking your prompt file.
+- Use only "Chat Completion" models. Legacy InstructGPT models such as "text-davinci-001" are not supported.
+- This tool does not perform serious Markdown parsing for fragment splitting. The algorithm may fail on an atypical source file that has no or very few blank lines. However, this also means that most Markdown dialects (including MDX) can be handled without any configuration. If this tool makes mistakes for certain custom markups, it can likely be addressed with tweaking your prompt file.
 - Actually, this tool does not perform any Markdown-specific processing other than code block detection, so it may also handle plain text or Wiki-style documents.
 - The combination of this tool and GPT-4 should do 80% of the translation job, but be sure to review the result at your own responsibility. It sometimes ignores your instruction or outputs invalid Markdown, most of which are easily detectable and fixable with tools like VS Code's diff editor.
