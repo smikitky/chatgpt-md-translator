@@ -81,7 +81,11 @@ const translateFile = async (
 const options = [
   { names: ['model', 'm'], type: 'string', help: 'Model to use.' },
   { names: ['fragment-size', 'f'], type: 'number', help: 'Fragment size.' },
-  { names: ['temperature', 't'], type: 'number', help: 'Temperature.' },
+  {
+    names: ['temperature', 't'],
+    type: 'string',
+    help: 'Temperature (number or "default").'
+  },
   { names: ['interval', 'i'], type: 'number', help: 'API call interval.' },
   { names: ['quiet', 'q'], type: 'bool', help: 'Suppress status messages.' },
   { names: ['out', 'o'], type: 'string', help: 'Output file.' },
@@ -144,7 +148,7 @@ const main = async () => {
     pc.bold('Model:'),
     config.model,
     pc.bold('Temperature:'),
-    String(config.temperature)
+    config.temperature === 'default' ? '(default)' : String(config.temperature)
   );
 
   for (const [inFile, outFile] of pathMap) {

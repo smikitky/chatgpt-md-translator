@@ -19,7 +19,7 @@ export interface Config {
   apiCallInterval: number;
   quiet: boolean;
   fragmentSize: number;
-  temperature: number;
+  temperature: number | 'default';
   codeBlockPreservationLines: number;
   out: string | null;
   outputFilePattern: string | null;
@@ -63,13 +63,15 @@ const resolveModelShorthand = (model: string, warnings: string[]): string => {
     '3': 'gpt-3.5-turbo',
     '3large': 'gpt-3.5-turbo-16k' // legacy
   };
-  
+
   if (model in shorthands) {
     const fullName = shorthands[model];
-    warnings.push(`Model shorthand "${model}" is deprecated. Use "${fullName}" instead.`);
+    warnings.push(
+      `Model shorthand "${model}" is deprecated. Use "${fullName}" instead.`
+    );
     return fullName;
   }
-  
+
   return model;
 };
 
@@ -93,6 +95,11 @@ export const loadConfig = async (args: {
     return Number.isNaN(num) ? undefined : num;
   };
 
+  const toTemperature = (input: unknown) =>
+    typeof input === 'string' && input.toLowerCase() === 'default'
+      ? 'default'
+      : toNum(input);
+
   const outSuffix: string | null =
     conf.OUT_SUFFIX?.length > 0
       ? conf.OUT_SUFFIX
@@ -112,7 +119,7 @@ export const loadConfig = async (args: {
     return null;
   };
 
-  const config = {
+  const config: Config = {
     apiEndpoint:
       conf.API_ENDPOINT ?? 'https://api.openai.com/v1/chat/completions',
     apiKey: conf.OPENAI_API_KEY,
@@ -127,7 +134,8 @@ export const loadConfig = async (args: {
       (args.quiet as boolean | undefined) ?? process.stdout.isTTY === false,
     fragmentSize:
       toNum(args.fragment_size) ?? toNum(conf.FRAGMENT_TOKEN_SIZE) ?? 2048,
-    temperature: toNum(args.temperature) ?? toNum(conf.TEMPERATURE) ?? 0.1,
+    temperature:
+      toTemperature(args.temperature) ?? toTemperature(conf.TEMPERATURE) ?? 0.1,
     codeBlockPreservationLines: toNum(conf.CODE_BLOCK_PRESERVATION_LINES) ?? 5,
     out: (args.out as string)?.length > 0 ? (args.out as string) : null,
     outputFilePattern:

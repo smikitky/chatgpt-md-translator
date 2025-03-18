@@ -88,7 +88,7 @@ const configureApiCaller = (options: ConfigureApiOptions) => {
         signal: combinedSignal,
         body: JSON.stringify({
           model,
-          temperature,
+          ...(typeof temperature === 'number' ? { temperature } : {}),
           messages,
           stream: true
         })
