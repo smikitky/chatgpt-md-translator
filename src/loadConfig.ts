@@ -56,14 +56,21 @@ export const findPromptFile = () =>
     path.join(homeDir, '.chatgpt-md-translator-prompt.md')
   ]);
 
-const resolveModelShorthand = (model: string): string => {
+const resolveModelShorthand = (model: string, warnings: string[]): string => {
   const shorthands: { [key: string]: string } = {
-    '4': 'gpt-4-turbo',
+    '4': 'gpt-4o',
     '4large': 'gpt-4-32k', // legacy
     '3': 'gpt-3.5-turbo',
     '3large': 'gpt-3.5-turbo-16k' // legacy
   };
-  return shorthands[model] ?? model;
+  
+  if (model in shorthands) {
+    const fullName = shorthands[model];
+    warnings.push(`Model shorthand "${model}" is deprecated. Use "${fullName}" instead.`);
+    return fullName;
+  }
+  
+  return model;
 };
 
 export const loadConfig = async (args: {
@@ -111,7 +118,8 @@ export const loadConfig = async (args: {
     apiKey: conf.OPENAI_API_KEY,
     prompt: await readTextFile(promptPath),
     model: resolveModelShorthand(
-      (args.model as string) ?? conf.MODEL_NAME ?? '3'
+      (args.model as string) ?? conf.MODEL_NAME ?? 'gpt-3.5-turbo',
+      warnings
     ),
     baseDir: conf.BASE_DIR ?? null,
     apiCallInterval: toNum(args.interval) ?? toNum(conf.API_CALL_INTERVAL) ?? 0,
