@@ -1,3 +1,7 @@
+## 1.9.1 (2025-03-19)
+
+- Added a warning when the language model is not explicitly specified. The default is GPT 3.5, but this is no longer a good option today. In the future, this setting will be required.
+
 ## 1.9.0 (2025-03-19)
 
 - Added `REASONING_EFFORT` config option for reasoning models.

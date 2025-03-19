@@ -154,6 +154,13 @@ export const loadConfig = async (args: {
     httpsProxy: conf.HTTPS_PROXY ?? process.env.HTTPS_PROXY
   };
 
+  if (!args.model && !conf.MODEL_NAME) {
+    warnings.push(
+      'Model name is not explicitly set. ' +
+        'Using "gpt-3.5-turbo" by default, but you probably want to use a newer model.'
+    );
+  }
+
   if (config.outputFilePattern && !/{(\w+?)}/.test(config.outputFilePattern)) {
     warnings.push('OUTPUT_FILE_PATTERN does not contain any placeholder.');
   }

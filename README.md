@@ -48,12 +48,12 @@ Shorthand model names such as `4` (→`gpt-4o`) have been deprecated. Use full m
 
 <details>
 
-<summary>Usage Notes for Reasoning Models</summary>
+<summary>ℹ️ Usage Notes for Reasoning Models</summary>
 
 This tool now has basic support for reasoning models such as "o3-mini", but be aware of the following:
 
 - It thinks hard before starting to transmit the translation result, so you need to wait patiently.
-- It uses a "reasoning effort" parameter instead of "temperature".
+- It uses a "reasoning effort" parameter instead of "temperature". To stop sending the temperature parameter, you need to specify `TEMPERATURE=default` in the config file.
 - Reasoning models are not necessarily better when it comes to simple natural language processing. Ordinary chat models such as `gpt-4o` may be sufficient.
 
 Your config file would look like this:
