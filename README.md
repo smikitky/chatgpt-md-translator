@@ -44,18 +44,31 @@ In addition to `OPENAI_API_TOKEN`, you can set several values in the config file
 
 This is the setting that has the greatest impact on translation quality and price. Visit [the Models section](https://platform.openai.com/docs/models/) and specify one of the models that support the Chat Completion endpoint, such as `gpt-4o` or `o3-mini`. For backward compatibility, the default model is still `gpt-3.5-turbo`, but `gpt-4o` is almost certainly the better option now.
 
-Shorthand model names such as `4` (→`gpt-4-turbo`) have been deprecated. Use full model names available in the OpenAI API.
+Shorthand model names such as `4` (→`gpt-4o`) have been deprecated. Use full model names available in the OpenAI API.
 
-> [!NOTE] 
-> When choosing a reasoning model such as `o3-mini`, be aware of the following:
->
-> - Specify the temperature as `default` when you see an error "'temperature' is not supported with this model".
-> - Reasoning models are not necessarily better when it comes to natural language processing. Ordinary chat models such as `gpt-4o` may be sufficient.
-> - It thinks hard before starting to send the translation, so wait patiently.
+<details>
+
+<summary>Usage Notes for Reasoning Models</summary>
+
+This tool now has basic support for reasoning models such as "o3-mini", but be aware of the following:
+
+- It thinks hard before starting to transmit the translation result, so you need to wait patiently.
+- It uses a "reasoning effort" parameter instead of "temperature".
+- Reasoning models are not necessarily better when it comes to simple natural language processing. Ordinary chat models such as `gpt-4o` may be sufficient.
+
+Your config file would look like this:
+
+```
+MODEL=o3-mini
+TEMPERATURE=default
+REASONING_EFFORT=low
+```
+
+</details>
 
 ### Fragment Size (`FRAGMENT_TOKEN_SIZE`)
 
-With this option, this tool can split a given Markdown file into multiple parts (fragments), pass them to the API along with the prompt in parallel, and combine the translated results. This option determines the (soft) maximum length of each fragment. The default is 2048 (in string `.length`), but this may be too conservative today.
+This tool can split a given Markdown file into multiple parts (fragments), pass them to the API along with the prompt in parallel, and combine the translated results. This option determines the (soft) maximum length of each fragment. The default is 2048 (in string `.length`), but this may be too conservative today.
 
 When you're using a recent model such as GPT-4o that supports a large number of output tokens, this can typically be set to a very large number (e.g., 50000) so that you can translate the entire article at once. However, when the result exceeds the max output tokens, the transfer of the translated text may stop midway. If this happens, the program will automatically split the fragment in half and try again recursively. Try to avoid this as it can waste your time and money.
 
@@ -71,8 +84,7 @@ The optimal value depends on several factors:
 
 This controls the randomness of the output. See the [official API docs](https://platform.openai.com/docs/api-reference/chat/create#chat-create-temperature). The default is `0.1`, which is intentionally much lower than the original ChatGPT API default (`1.0`). Since this tool works by splitting a file, too much randomness can lead to inconsistent translations. Experience suggests that a high value also increases the risk of breaking markups or ignoring your instructions.
 
-> [!NOTE] 
-> Some models throw an error when a temperature is specified in the API. If this happens, set as `TEMPERATURE=default`.
+If you're using a reasoning model, this must be set to "default". See the usage notes above.
 
 ### API Call Interval (`API_CALL_INTERVAL`)
 

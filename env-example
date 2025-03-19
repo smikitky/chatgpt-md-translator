@@ -29,6 +29,9 @@ OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxx"
 # Sampling temperature, i.e., randomness of the generated text.
 # TEMPERATURE=0.1
 
+# Reasoning effort parameter. Only relevant for reasoning models.
+# REASONING_EFFORT=default
+
 # If you hit the API rate limit, you can set this to a positive number.
 # API is not called more frequently than the given interval (in seconds).
 # API_CALL_INTERVAL=0

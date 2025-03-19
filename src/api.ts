@@ -52,7 +52,7 @@ const configureApiCaller = (options: ConfigureApiOptions) => {
     signal,
     maxRetry = 2
   ): Promise<SettledStatus> => {
-    const { prompt, model, temperature } = config;
+    const { prompt, model, temperature, reasoningEffort } = config;
     const agent = httpsProxy ? new HttpsProxyAgent(httpsProxy) : undefined;
     const abortController = new AbortController();
     const combinedSignal = signal
@@ -89,6 +89,9 @@ const configureApiCaller = (options: ConfigureApiOptions) => {
         body: JSON.stringify({
           model,
           ...(typeof temperature === 'number' ? { temperature } : {}),
+          ...(reasoningEffort !== 'default'
+            ? { reasoning_effort: reasoningEffort }
+            : {}),
           messages,
           stream: true
         })

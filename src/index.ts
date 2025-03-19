@@ -148,7 +148,10 @@ const main = async () => {
     pc.bold('Model:'),
     config.model,
     pc.bold('Temperature:'),
-    config.temperature === 'default' ? '(default)' : String(config.temperature)
+    config.temperature === 'default' ? '(default)' : String(config.temperature),
+    ...(config.reasoningEffort !== 'default'
+      ? [pc.bold('Reasoning effort:'), config.reasoningEffort]
+      : [])
   );
 
   for (const [inFile, outFile] of pathMap) {

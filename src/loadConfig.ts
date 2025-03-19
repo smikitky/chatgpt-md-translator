@@ -10,6 +10,9 @@ const homeDir = os.homedir();
 const overwritePolicies = ['skip', 'abort', 'overwrite'] as const;
 export type OverwritePolicy = (typeof overwritePolicies)[number];
 
+const reasoningEffortOptions = ['low', 'medium', 'high'] as const;
+export type ReasoningEffort = (typeof reasoningEffortOptions)[number];
+
 export interface Config {
   apiEndpoint: string;
   apiKey: string;
@@ -20,6 +23,7 @@ export interface Config {
   quiet: boolean;
   fragmentSize: number;
   temperature: number | 'default';
+  reasoningEffort: 'default' | ReasoningEffort;
   codeBlockPreservationLines: number;
   out: string | null;
   outputFilePattern: string | null;
@@ -136,6 +140,7 @@ export const loadConfig = async (args: {
       toNum(args.fragment_size) ?? toNum(conf.FRAGMENT_TOKEN_SIZE) ?? 2048,
     temperature:
       toTemperature(args.temperature) ?? toTemperature(conf.TEMPERATURE) ?? 0.1,
+    reasoningEffort: (conf.REASONING_EFFORT as ReasoningEffort) ?? 'default',
     codeBlockPreservationLines: toNum(conf.CODE_BLOCK_PRESERVATION_LINES) ?? 5,
     out: (args.out as string)?.length > 0 ? (args.out as string) : null,
     outputFilePattern:

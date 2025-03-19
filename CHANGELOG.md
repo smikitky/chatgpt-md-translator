@@ -1,6 +1,10 @@
+## 1.9.0 (2025-03-19)
+
+- Added `REASONING_EFFORT` config option for reasoning models.
+
 ## 1.8.0 (2025-03-18)
 
-- Support `-t default` or `TEMPERATURE=default` for models that do not support setting the temperature parameter. Currently, some reasoning models such as `o3-mini` throw an error when temperature is specified.
+- Supported `-t default` or `TEMPERATURE=default` for models that do not support setting the temperature parameter. Currently, some reasoning models such as `o3-mini` throw an error when temperature is specified.
 - The shorthand model name `4` now points to `gpt-4o` instead of `gpt-4-turbo`. However, shorthand model names are now deprecated. Specify full chat model names instead.
 
 ## 1.7.1 (2024-04-12)
